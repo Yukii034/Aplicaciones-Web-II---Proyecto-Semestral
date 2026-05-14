@@ -13,12 +13,13 @@
 # **• Reputación:** Se construye un perfil de confianza de cada usuario que muestra sus puntos, niveles y logros desbloqueados, así la gente pueda confiar en la otra persona antes de poder hacer un trato y no genere desconfianza  
 
 # **Tech Stack (Stack Tecnológico o Tecnologías a Utilizar):**
-# **•Vue.js:** Framework progresivo de JavaScript utilizado para construir una interfaz de usuario interactiva, reactiva y eficiente. **(Sujeto a Cambios)**
-
-# **•Golang (Go):** Lenguaje de programación de alto rendimiento y tipado fuerte, ideal para construir APIs REST rápidas y escalables.
-
-# **•PostgreSQL (Propuesta):** Sistema de gestión de bases de datos relacionales robusto, elegido para garantizar la integridad de los datos en producción. **(Sujeto a Cambios)**
-
-# **•SQLite (Propuesta):** Base de datos ligera basada en archivos, utilizada como propuesta para agilizar las pruebas y el testing en entornos locales. **(Sujeto a Cambios)**
-
-# **•Git y GitHub:** Herramientas esenciales de control de versiones que permiten la colaboración distribuida y el seguimiento del historial del proyecto.
+# **Go 1.22+:** Lenguaje de programación de alto rendimiento utilizado para el desarrollo del backend, aprovechando su eficiencia en el manejo de concurrencia.
+# **Chi Router:** Framework ligero y minimalista para Go que permite gestionar las rutas de la API de forma rápida y con un control total sobre el flujo HTTP.
+# **GORM:** Herramienta de mapeo objeto-relacional (ORM) para Go que simplifica la interacción con la base de datos y la gestión de modelos complejos.
+# **Golang-JWT:** Librería encargada de la generación y validación de tokens de seguridad para garantizar una autenticación confiable en cada petición del usuario.
+# **Testify:** Suite de herramientas para pruebas unitarias en Go que facilita la escritura de tests descriptivos y asegura la estabilidad de la lógica de negocio.
+# **Docker:** Plataforma de contenedores que permite estandarizar el entorno de desarrollo y despliegue, asegurando que la API funcione igual en cualquier servidor.
+# **SQLite (Desarrollo):** Base de datos relacional ligera basada en archivos, ideal para realizar pruebas rápidas y desarrollo local sin dependencias externas.
+# **PostgreSQL (Producción):** Sistema de base de datos robusto y escalable utilizado para el entorno final, garantizando la persistencia y seguridad de la información.
+# **Git:** Sistema de control de versiones distribuido que permite registrar cada cambio realizado en el código y trabajar de forma segura en diferentes ramas.
+# **GitHub:** Plataforma en la nube que aloja el repositorio del proyecto, facilitando la colaboración entre los miembros del equipo y la integración del código.
