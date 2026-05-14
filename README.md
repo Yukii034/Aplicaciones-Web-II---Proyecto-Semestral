@@ -11,3 +11,14 @@
 # **• Transacciones:** Cuando el cliente quiere un producto, se genera lo que es un acuerdos entre las dos partes que pasa por diferentes etapas: propuesto, aceptado y completado, ambos usuarios deben confirmar que la entrega ocurrió.
 
 # **• Reputación:** Se construye un perfil de confianza de cada usuario que muestra sus puntos, niveles y logros desbloqueados, así la gente pueda confiar en la otra persona antes de poder hacer un trato y no genere desconfianza  
+
+# **Tech Stack (Stack Tecnológico o Tecnologías a Utilizar):**
+# **•Vue.js:** Framework progresivo de JavaScript utilizado para construir una interfaz de usuario interactiva, reactiva y eficiente. **(Sujeto a Cambios)**
+
+# **•Golang (Go):** Lenguaje de programación de alto rendimiento y tipado fuerte, ideal para construir APIs REST rápidas y escalables.
+
+# **•PostgreSQL (Propuesta):** Sistema de gestión de bases de datos relacionales robusto, elegido para garantizar la integridad de los datos en producción. **(Sujeto a Cambios)**
+
+# **•SQLite (Propuesta):** Base de datos ligera basada en archivos, utilizada como propuesta para agilizar las pruebas y el testing en entornos locales. **(Sujeto a Cambios)**
+
+# **•Git y GitHub:** Herramientas esenciales de control de versiones que permiten la colaboración distribuida y el seguimiento del historial del proyecto.
