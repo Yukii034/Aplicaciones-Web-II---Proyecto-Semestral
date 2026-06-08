@@ -18,19 +18,20 @@ func main() {
 	// 1. Abrir SQLite y migrar
 	db, err := gorm.Open(sqlite.Open("proyecto.db"), &gorm.Config{})
 	if err != nil {
-		log.Fatal("No se pudo abrir la base de datos: ", err)
+		log.Fatal("no se pudo abrir la base de datos: ", err)
 	}
 	if err := db.AutoMigrate(&models.Inventario{}, &models.Publicacion{}); err != nil {
-		log.Fatal("Falló AutoMigrate: ", err)
+		log.Fatal("falló AutoMigrate: ", err)
 	}
 
-	// 2. Crear el almacenamiento
+	// 2. Crear almacén y sembrar datos de ejemplo
 	almacen := storage.NuevoAlmacenSQLite(db)
+	almacen.SembrarSiVacio()
 
-	// 3. Crear el servidor
+	// 3. Crear servidor
 	servidor := handlers.NewServer(almacen)
 
-	// 4. Router + middleware
+	// 4. Router
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
