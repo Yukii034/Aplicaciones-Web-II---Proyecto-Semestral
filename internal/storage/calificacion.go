@@ -16,9 +16,9 @@ func (a *AlmacenSQLite) BuscarCalificacionPorID(id int) (models.Calificacion, bo
 	return item, true
 }
 
-func (a *AlmacenSQLite) CrearCalificacion(c models.Calificacion) models.Calificacion {
-	a.db.Create(&c) // GORM rellena el ID autogenerado en &p
-	return c
+func (a *AlmacenSQLite) CrearCalificacion(ca models.Calificacion) models.Calificacion {
+	a.db.Create(&ca) // GORM rellena el ID autogenerado en &p
+	return ca
 }
 
 func (a *AlmacenSQLite) ActualizarCalificacion(id int, datos models.Calificacion) (models.Calificacion, bool) {
