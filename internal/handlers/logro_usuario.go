@@ -10,13 +10,13 @@ import (
 	"proyecto-semestral/internal/models"
 )
 
-// ListarLogroUsuario atiende GET /api/v1/logro_usuario.
+// ListarLogroUsuario atiende GET /api/v1/logro_usuarios.
 func (s *Server) ListarLogro_Usuario(w http.ResponseWriter, _ *http.Request) {
-	logro_usuario := s.Storage.ListarLogro_Usuario()
-	RespondJSON(w, http.StatusOK, logro_usuario)
+	logro_usuarios := s.Storage.ListarLogro_Usuario()
+	RespondJSON(w, http.StatusOK, logro_usuarios)
 }
 
-// ObtenerLogro_Usuario atiende GET /api/v1/logro_usuario/{id}.
+// ObtenerLogro_Usuario atiende GET /api/v1/logro_usuarios/{id}.
 func (s *Server) ObtenerLogro_Usuario(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -33,7 +33,7 @@ func (s *Server) ObtenerLogro_Usuario(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, logro_usuario)
 }
 
-// CrearLogro_Usuario atiende POST /api/v1/logro_usuario.
+// CrearLogro_Usuario atiende POST /api/v1/logro_usuarios.
 func (s *Server) CrearLogro_Usuario(w http.ResponseWriter, r *http.Request) {
 	var nueva models.Logro_Usuario
 	if err := json.NewDecoder(r.Body).Decode(&nueva); err != nil {
@@ -54,7 +54,7 @@ func (s *Server) CrearLogro_Usuario(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusCreated, creada)
 }
 
-// ActualizarLogro_Usuario atiende PUT /api/v1/logro_usuario/{id}.
+// ActualizarLogro_Usuario atiende PUT /api/v1/logro_usuarios/{id}.
 func (s *Server) ActualizarLogro_Usuario(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -87,7 +87,7 @@ func (s *Server) ActualizarLogro_Usuario(w http.ResponseWriter, r *http.Request)
 	RespondJSON(w, http.StatusOK, actualizada)
 }
 
-// BorrarLogro_Usuario atiende DELETE /api/v1/logro_usuario/{id}.
+// BorrarLogro_Usuario atiende DELETE /api/v1/logro_usuarios/{id}.
 func (s *Server) BorrarLogro_Usuario(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {

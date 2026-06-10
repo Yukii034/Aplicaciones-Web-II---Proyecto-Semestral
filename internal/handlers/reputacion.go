@@ -10,13 +10,13 @@ import (
 	"proyecto-semestral/internal/models"
 )
 
-// ListarReputacion atiende GET /api/v1/inventarios.
+// ListarReputacion atiende GET /api/v1/reputaciones.
 func (s *Server) ListarReputacion(w http.ResponseWriter, _ *http.Request) {
 	reputaciones := s.Storage.ListarReputacion()
 	RespondJSON(w, http.StatusOK, reputaciones)
 }
 
-// ObtenerReputacion atiende GET /api/v1/inventarios/{id}.
+// ObtenerReputacion atiende GET /api/v1/reputaciones/{id}.
 func (s *Server) ObtenerReputacion(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -33,7 +33,7 @@ func (s *Server) ObtenerReputacion(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, reputacion)
 }
 
-// CrearReputacion atiende POST /api/v1/inventarios.
+// CrearReputacion atiende POST /api/v1/reputaciones.
 func (s *Server) CrearReputacion(w http.ResponseWriter, r *http.Request) {
 	var nueva models.Reputacion
 	if err := json.NewDecoder(r.Body).Decode(&nueva); err != nil {
@@ -49,7 +49,7 @@ func (s *Server) CrearReputacion(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusCreated, creada)
 }
 
-// ActualizarReputacion atiende PUT /api/v1/inventarios/{id}.
+// ActualizarReputacion atiende PUT /api/v1/reputaciones/{id}.
 func (s *Server) ActualizarReputacion(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -76,7 +76,7 @@ func (s *Server) ActualizarReputacion(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, actualizada)
 }
 
-// BorrarReputacion atiende DELETE /api/v1/inventarios/{id}.
+// BorrarReputacion atiende DELETE /api/v1/reputaciones/{id}.
 func (s *Server) BorrarReputacion(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
