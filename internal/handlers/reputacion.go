@@ -84,7 +84,7 @@ func (s *Server) BorrarReputacion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.Storage.BorrarInventario(id) {
+	if !s.Storage.BorrarReputacion(id) {
 		RespondError(w, http.StatusNotFound, "Reputacion no encontrada")
 		return
 	}
