@@ -48,6 +48,7 @@ func main() {
 
 	// 5. Rutas
 	r.Route("/api/v1", func(r chi.Router) {
+		// Módulo de Publicaciones e Inventario
 		r.Get("/inventario", servidor.ListarInventario)
 		r.Post("/inventario", servidor.CrearInventario)
 		r.Get("/inventario/{id}", servidor.ObtenerInventario)
@@ -60,6 +61,7 @@ func main() {
 		r.Put("/publicaciones/{id}", servidor.ActualizarPublicacion)
 		r.Delete("/publicaciones/{id}", servidor.BorrarPublicacion)
 
+		// Módulo de Reputación y Logros
 		r.Get("/reputaciones", servidor.ListarReputacion)
 		r.Post("/reputaciones", servidor.CrearReputacion)
 		r.Get("/reputaciones/{id}", servidor.ObtenerReputacion)
@@ -84,6 +86,7 @@ func main() {
 		r.Put("/calificaciones/{id}", servidor.ActualizarCalificacion)
 		r.Delete("/calificaciones/{id}", servidor.BorrarCalificacion)
 
+		// Módulo de Acuerdos y Transacciones
 		r.Get("/usuarios", servidor.ListarUsuarios)
 		r.Post("/usuarios", servidor.CrearUsuario)
 		r.Get("/usuarios/{id}", servidor.ObtenerUsuario)
