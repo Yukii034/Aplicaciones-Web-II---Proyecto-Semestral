@@ -62,6 +62,25 @@ func (a *AlmacenSQLite) SembrarSiVacio() {
 		{Comentarios: "Buena experiencia en general", UsuarioID: 3, AcuerdoID: 1},
 	}
 	a.db.Create(&calificaciones)
+
+	usuarios := []models.Usuario{
+		{Nombre: "Juan Pérez", Email: "juan.perez@example.com", Contraseña: "pass123", Tipo_de_Usuario: "regular", Ciudad: "Madrid"},
+		{Nombre: "María García", Email: "maria.garcia@example.com", Contraseña: "pass123", Tipo_de_Usuario: "regular", Ciudad: "Barcelona"},
+		{Nombre: "Carlos López", Email: "carlos.lopez@example.com", Contraseña: "pass123", Tipo_de_Usuario: "admin", Ciudad: "Valencia"},
+	}
+	a.db.Create(&usuarios)
+
+	acuerdos := []models.Acuerdo{
+		{Estado: "completado", IDOfertante: 1, IDPublicador: 2, PublicacionID: 1, Tipo: "intercambio"},
+		{Estado: "completado", IDOfertante: 2, IDPublicador: 3, PublicacionID: 2, Tipo: "donacion"},
+	}
+	a.db.Create(&acuerdos)
+
+	acuerdo_items := []models.AcuerdoItem{
+		{AcuerdoID: 1, InventarioID: 1, Rol: "ofertado"},
+		{AcuerdoID: 2, InventarioID: 2, Rol: "solicitado"},
+	}
+	a.db.Create(&acuerdo_items)
 }
 
 var _ Almacen = (*AlmacenSQLite)(nil)
