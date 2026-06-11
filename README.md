@@ -23,3 +23,5 @@
 # **• PostgreSQL (Producción):** Sistema de base de datos robusto y escalable utilizado para el entorno final, garantizando la persistencia y seguridad de la información.
 # **• Git:** Sistema de control de versiones distribuido que permite registrar cada cambio realizado en el código y trabajar de forma segura en diferentes ramas.
 # **• GitHub:** Plataforma en la nube que aloja el repositorio del proyecto, facilitando la colaboración entre los miembros del equipo y la integración del código.
+
+# **URL a documentos anexos:**  https://uleam-my.sharepoint.com/:f:/g/personal/e1350140990_live_uleam_edu_ec/IgDPcqsDRv5gRJwr6v39Be3IAdZLn4wA85WITu23YC422JA?e=QhxhUm
