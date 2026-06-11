@@ -44,4 +44,25 @@ type Almacen interface {
 	CrearCalificacion(ca models.Calificacion) models.Calificacion
 	ActualizarCalificacion(id int, datos models.Calificacion) (models.Calificacion, bool)
 	BorrarCalificacion(id int) bool
+
+	//Usuario
+	ListarUsuarios() []models.Usuario
+	BuscarUsuarioPorID(id int) (models.Usuario, bool)
+	CrearUsuario(usuario models.Usuario) models.Usuario
+	ActualizarUsuario(id int, datos models.Usuario) (models.Usuario, bool)
+	BorrarUsuario(id int) bool
+
+	//Acuerdo
+	ListarAcuerdos() []models.Acuerdo
+	BuscarAcuerdoPorID(id int) (models.Acuerdo, bool)
+	CrearAcuerdo(acuerdo models.Acuerdo) models.Acuerdo
+	ActualizarAcuerdo(id int, datos models.Acuerdo) (models.Acuerdo, bool)
+	BorrarAcuerdo(id int) bool
+
+	//AcuerdoItem
+	ListarAcuerdoItems() []models.AcuerdoItem
+	BuscarAcuerdoItemPorID(id int) (models.AcuerdoItem, bool)
+	CrearAcuerdoItem(item models.AcuerdoItem) models.AcuerdoItem
+	ActualizarAcuerdoItem(id int, datos models.AcuerdoItem) (models.AcuerdoItem, bool)
+	BorrarAcuerdoItem(id int) bool
 }
