@@ -26,7 +26,7 @@ func (s *Server) ObtenerReputacion(w http.ResponseWriter, r *http.Request) {
 
 	reputacion, encontrado := s.Storage.BuscarReputacionPorID(id)
 	if !encontrado {
-		RespondError(w, http.StatusNotFound, "Inventario no encontrada")
+		RespondError(w, http.StatusNotFound, "Reputacion no encontrada")
 		return
 	}
 
