@@ -17,7 +17,7 @@ func (a *AlmacenSQLite) BuscarInventarioPorID(id int) (models.Inventario, bool) 
 }
 
 func (a *AlmacenSQLite) CrearInventario(i models.Inventario) models.Inventario {
-	a.db.Create(&i) // GORM rellena el ID autogenerado en &p
+	a.db.Create(&i)
 	return i
 }
 

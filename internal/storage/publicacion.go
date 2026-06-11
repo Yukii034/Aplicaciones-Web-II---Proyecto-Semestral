@@ -17,7 +17,7 @@ func (a *AlmacenSQLite) BuscarPublicacionPorID(id int) (models.Publicacion, bool
 }
 
 func (a *AlmacenSQLite) CrearPublicacion(p models.Publicacion) models.Publicacion {
-	a.db.Create(&p) // GORM rellena el ID autogenerado en &p
+	a.db.Create(&p)
 	return p
 }
 
