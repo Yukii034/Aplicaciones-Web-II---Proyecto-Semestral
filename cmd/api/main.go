@@ -61,7 +61,7 @@ func main() {
 		r.Put("/publicaciones/{id}", servidor.ActualizarPublicacion)
 		r.Delete("/publicaciones/{id}", servidor.BorrarPublicacion)
 
-		// Módulo de Reputación y Logros
+		// Módulo de Reputación y Logro_Usuario
 		r.Get("/reputaciones", servidor.ListarReputacion)
 		r.Post("/reputaciones", servidor.CrearReputacion)
 		r.Get("/reputaciones/{id}", servidor.ObtenerReputacion)
