@@ -27,6 +27,9 @@ func main() {
 		&models.Logro_Usuario{},
 		&models.Logro{},
 		&models.Calificacion{},
+		&models.Usuario{},
+		&models.Acuerdo{},
+		&models.AcuerdoItem{},
 	); err != nil {
 		log.Fatal("falló AutoMigrate: ", err)
 	}
@@ -80,6 +83,12 @@ func main() {
 		r.Get("/calificaciones/{id}", servidor.ObtenerCalificacion)
 		r.Put("/calificaciones/{id}", servidor.ActualizarCalificacion)
 		r.Delete("/calificaciones/{id}", servidor.BorrarCalificacion)
+
+		r.Get("/usuarios", servidor.ListarUsuarios)
+		r.Post("/usuarios", servidor.CrearUsuario)
+		r.Get("/usuarios/{id}", servidor.ObtenerUsuario)
+		r.Put("/usuarios/{id}", servidor.ActualizarUsuario)
+		r.Delete("/usuarios/{id}", servidor.EliminarUsuario)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
