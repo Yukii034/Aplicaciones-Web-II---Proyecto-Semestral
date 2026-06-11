@@ -89,6 +89,18 @@ func main() {
 		r.Get("/usuarios/{id}", servidor.ObtenerUsuario)
 		r.Put("/usuarios/{id}", servidor.ActualizarUsuario)
 		r.Delete("/usuarios/{id}", servidor.EliminarUsuario)
+
+		r.Get("/acuerdos", servidor.ListarAcuerdo)
+		r.Post("/acuerdos", servidor.CrearAcuerdo)
+		r.Get("/acuerdos/{id}", servidor.ObtenerAcuerdo)
+		r.Put("/acuerdos/{id}", servidor.ActualizarAcuerdo)
+		r.Delete("/acuerdos/{id}", servidor.EliminarAcuerdo)
+
+		r.Get("/acuerdo_items", servidor.ListarAcuerdoItem)
+		r.Post("/acuerdo_items", servidor.CrearAcuerdoItem)
+		r.Get("/acuerdo_items/{id}", servidor.ObtenerAcuerdoItem)
+		r.Put("/acuerdo_items/{id}", servidor.ActualizarAcuerdoItem)
+		r.Delete("/acuerdo_items/{id}", servidor.EliminarAcuerdoItem)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
