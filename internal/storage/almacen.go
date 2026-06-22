@@ -2,6 +2,25 @@ package storage
 
 import "proyecto-semestral/internal/models"
 
+type PublicacionRepository interface {
+	// Publicacion
+	ListarPublicacion() []models.Publicacion
+	BuscarPublicacionPorID(id int) (models.Publicacion, bool)
+	CrearPublicacion(p models.Publicacion) models.Publicacion
+	ActualizarPublicacion(id int, datos models.Publicacion) (models.Publicacion, bool)
+	BorrarPublicacion(id int) bool
+}
+
+type UserRepository interface {
+	//Usuario
+	ListarUsuarios() []models.Usuario
+	BuscarUsuarioPorID(id int) (models.Usuario, bool)
+	CrearUsuario(u models.Usuario) models.Usuario
+	ActualizarUsuario(id int, datos models.Usuario) (models.Usuario, bool)
+	BorrarUsuario(id int) bool
+	BuscarUsuarioPorEmail(email string) (models.Usuario, bool)
+}
+
 type Almacen interface {
 	// Inventario
 	ListarInventario() []models.Inventario
@@ -10,12 +29,7 @@ type Almacen interface {
 	ActualizarInventario(id int, datos models.Inventario) (models.Inventario, bool)
 	BorrarInventario(id int) bool
 
-	// Publicacion
-	ListarPublicacion() []models.Publicacion
-	BuscarPublicacionPorID(id int) (models.Publicacion, bool)
-	CrearPublicacion(p models.Publicacion) models.Publicacion
-	ActualizarPublicacion(id int, datos models.Publicacion) (models.Publicacion, bool)
-	BorrarPublicacion(id int) bool
+	PublicacionRepository
 
 	// Reputacion
 	ListarReputacion() []models.Reputacion
@@ -45,12 +59,7 @@ type Almacen interface {
 	ActualizarCalificacion(id int, datos models.Calificacion) (models.Calificacion, bool)
 	BorrarCalificacion(id int) bool
 
-	//Usuario
-	ListarUsuarios() []models.Usuario
-	BuscarUsuarioPorID(id int) (models.Usuario, bool)
-	CrearUsuario(usuario models.Usuario) models.Usuario
-	ActualizarUsuario(id int, datos models.Usuario) (models.Usuario, bool)
-	BorrarUsuario(id int) bool
+	UserRepository
 
 	//Acuerdo
 	ListarAcuerdos() []models.Acuerdo

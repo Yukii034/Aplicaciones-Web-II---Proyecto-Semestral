@@ -18,6 +18,14 @@ func (a *AlmacenSQLite) BuscarUsuarioPorID(id int) (models.Usuario, bool) {
 	return usuario, true
 }
 
+func (a *AlmacenSQLite) BuscarUsuarioPorEmail(email string) (models.Usuario, bool) {
+	var u models.Usuario
+	if err := a.db.Where("email = ?", email).First(&u).Error; err != nil {
+		return models.Usuario{}, false
+	}
+	return u, true
+}
+
 func (a *AlmacenSQLite) CrearUsuario(usuario models.Usuario) models.Usuario {
 	a.db.Create(&usuario) // GORM rellena el ID autogenerado en &p
 	return usuario
