@@ -17,7 +17,7 @@ func (a *AlmacenSQLite) BuscarLogro_UsuarioPorID(id int) (models.Logro_Usuario, 
 }
 
 func (a *AlmacenSQLite) CrearLogro_Usuario(lu models.Logro_Usuario) models.Logro_Usuario {
-	a.db.Create(&lu) // GORM rellena el ID autogenerado en &p
+	a.db.Create(&lu) // GORM rellena el ID autogenerado en &lu
 	return lu
 }
 

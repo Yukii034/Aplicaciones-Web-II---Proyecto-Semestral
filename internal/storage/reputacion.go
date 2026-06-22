@@ -17,7 +17,7 @@ func (a *AlmacenSQLite) BuscarReputacionPorID(id int) (models.Reputacion, bool) 
 }
 
 func (a *AlmacenSQLite) CrearReputacion(r models.Reputacion) models.Reputacion {
-	a.db.Create(&r) // GORM rellena el ID autogenerado en &p
+	a.db.Create(&r) // GORM rellena el ID autogenerado en &r
 	return r
 }
 
