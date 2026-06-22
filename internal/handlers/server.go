@@ -2,14 +2,21 @@ package handlers
 
 import (
 	"proyecto-semestral/internal/service"
-	"proyecto-semestral/internal/storage"
+	pi "proyecto-semestral/internal/service/modulo_pi" //importar subcarpeta de cada modulo en service
 )
 
 type Server struct {
-	Storage storage.Almacen
-	Auth    *service.AuthService
+	Inventario  *pi.InventarioService
+	Publicacion *pi.PublicacionService
+	// demás servicios de entidades
+	Auth *service.AuthService
 }
 
-func NewServer(s storage.Almacen, auth *service.AuthService) *Server {
-	return &Server{Storage: s, Auth: auth}
+func NewServer(inv *pi.InventarioService, pub *pi.PublicacionService, auth *service.AuthService) *Server {
+	return &Server{
+		Inventario:  inv,
+		Publicacion: pub,
+		// añadir cada nuevo servicio
+		Auth: auth,
+	}
 }

@@ -13,7 +13,7 @@ import (
 
 // ListarInventario atiende GET /api/v1/inventarios.
 func (s *Server) ListarInventario(w http.ResponseWriter, _ *http.Request) {
-	inventarios := s.Storage.ListarInventario()
+	inventarios := s.Inventario.ListarInventario() // cambiar a que todos tengan su servicio con su handler
 	RespondJSON(w, http.StatusOK, inventarios)
 }
 
@@ -25,9 +25,9 @@ func (s *Server) ObtenerInventario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inventario, encontrado := s.Storage.BuscarInventarioPorID(id)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "Inventario no encontrada")
+	inventario, err := s.Inventario.BuscarInventario(id)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -46,7 +46,11 @@ func (s *Server) CrearInventario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	creada := s.Storage.CrearInventario(nueva)
+	creada, err := s.Inventario.CrearInventario(nueva)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
+		return
+	}
 	RespondJSON(w, http.StatusCreated, creada)
 }
 
@@ -68,9 +72,9 @@ func (s *Server) ActualizarInventario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	actualizada, encontrada := s.Storage.ActualizarInventario(id, datos)
-	if !encontrada {
-		RespondError(w, http.StatusNotFound, "Inventario no encontrado")
+	actualizada, err := s.Inventario.ActualizarInventario(id, datos)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -85,8 +89,8 @@ func (s *Server) BorrarInventario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.Storage.BorrarInventario(id) {
-		RespondError(w, http.StatusNotFound, "Inventario no encontrado")
+	if err := s.Inventario.BorrarInventario(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 

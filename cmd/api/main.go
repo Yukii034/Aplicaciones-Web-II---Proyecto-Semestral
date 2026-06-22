@@ -13,6 +13,7 @@ import (
 	"proyecto-semestral/internal/middleware"
 	"proyecto-semestral/internal/models"
 	"proyecto-semestral/internal/service"
+	pi "proyecto-semestral/internal/service/modulo_pi" // agg la carpeta de cada servicio de cada modulo
 	"proyecto-semestral/internal/storage"
 )
 
@@ -37,18 +38,23 @@ func main() {
 	}
 
 	// 2. Crear almacén y sembrar datos de ejemplo
-	almacen := storage.NuevoAlmacenSQLite(db)
+	almacen := storage.NuevoAlmacenSQLite(db) // conexion a la db
 
-	authService := service.NewAuthService(almacen)
-	servidor := handlers.NewServer(almacen, authService)
+	authService := service.NewAuthService(almacen)  // login y tokens
+	invService := pi.NewInventarioService(almacen)  // logica de inventario
+	pubService := pi.NewPublicacionService(almacen) // logica de publicacion
+	// agg de las demás entidades
 
 	// agrega el middleware de auth
-	authMW := middleware.Auth(authService)
+	authMW := middleware.Auth(authService) // proteccion de rutas
+
+	servidor := handlers.NewServer(invService, pubService, authService) // junta todos los servicios - agg de los demas
 
 	// 4. Router
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
+	r.Use(middleware.CORS)
 
 	// 5. Rutas
 	r.Route("/api/v1", func(r chi.Router) {

@@ -2,6 +2,15 @@ package storage
 
 import "proyecto-semestral/internal/models"
 
+type InventarioRepository interface {
+	// Inventario
+	ListarInventario() []models.Inventario
+	BuscarInventarioPorID(id int) (models.Inventario, bool)
+	CrearInventario(i models.Inventario) models.Inventario
+	ActualizarInventario(id int, datos models.Inventario) (models.Inventario, bool)
+	BorrarInventario(id int) bool
+}
+
 type PublicacionRepository interface {
 	// Publicacion
 	ListarPublicacion() []models.Publicacion
@@ -21,13 +30,10 @@ type UserRepository interface {
 	BuscarUsuarioPorEmail(email string) (models.Usuario, bool)
 }
 
+// agregar las demas interfaces de cada entidad
+
 type Almacen interface {
-	// Inventario
-	ListarInventario() []models.Inventario
-	BuscarInventarioPorID(id int) (models.Inventario, bool)
-	CrearInventario(i models.Inventario) models.Inventario
-	ActualizarInventario(id int, datos models.Inventario) (models.Inventario, bool)
-	BorrarInventario(id int) bool
+	InventarioRepository
 
 	PublicacionRepository
 

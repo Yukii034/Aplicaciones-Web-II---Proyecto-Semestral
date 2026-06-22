@@ -13,7 +13,7 @@ import (
 
 // ListarPublicacion atiende GET /api/v1/publicaciones.
 func (s *Server) ListarPublicacion(w http.ResponseWriter, _ *http.Request) {
-	publicaciones := s.Storage.ListarPublicacion()
+	publicaciones := s.Publicacion.ListarPublicacion() // cambiar a que todos tengan su servicio con su handler
 	RespondJSON(w, http.StatusOK, publicaciones)
 }
 
@@ -25,9 +25,9 @@ func (s *Server) ObtenerPublicacion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	publicacion, encontrado := s.Storage.BuscarPublicacionPorID(id)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "Publicación no encontrada")
+	publicacion, err := s.Publicacion.BuscarPublicacion(id)
+	if err != nil { // agg los errores ya que ahora retornan errores
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -46,7 +46,11 @@ func (s *Server) CrearPublicacion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	creada := s.Storage.CrearPublicacion(nueva)
+	creada, err := s.Publicacion.CrearPublicacion(nueva)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
+		return
+	}
 	RespondJSON(w, http.StatusCreated, creada)
 }
 
@@ -68,9 +72,9 @@ func (s *Server) ActualizarPublicacion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	actualizada, encontrada := s.Storage.ActualizarPublicacion(id, datos)
-	if !encontrada {
-		RespondError(w, http.StatusNotFound, "Publicación no encontrada")
+	actualizada, err := s.Publicacion.ActualizarPublicacion(id, datos)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -85,8 +89,8 @@ func (s *Server) BorrarPublicacion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.Storage.BorrarPublicacion(id) {
-		RespondError(w, http.StatusNotFound, "Publicación no encontrada")
+	if err := s.Publicacion.BorrarPublicacion(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 

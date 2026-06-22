@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
+
+	"proyecto-semestral/internal/service"
 )
 
 func RespondJSON(w http.ResponseWriter, status int, data any) {
@@ -20,4 +23,19 @@ func RespondJSON(w http.ResponseWriter, status int, data any) {
 
 func RespondError(w http.ResponseWriter, status int, mensaje string) {
 	RespondJSON(w, status, map[string]string{"error": mensaje})
+}
+
+func statusDeError(err error) int {
+	switch {
+	case errors.Is(err, service.ErrNoEncontrado):
+		return http.StatusNotFound
+	case errors.Is(err, service.ErrEmailEnUso):
+		return http.StatusConflict
+	case errors.Is(err, service.ErrCredencialesInvalidas):
+		return http.StatusUnauthorized
+	case errors.Is(err, service.ErrVacio):
+		return http.StatusBadRequest
+	default:
+		return http.StatusInternalServerError
+	}
 }
