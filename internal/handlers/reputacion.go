@@ -12,7 +12,7 @@ import (
 
 // ListarReputacion atiende GET /api/v1/reputaciones.
 func (s *Server) ListarReputacion(w http.ResponseWriter, _ *http.Request) {
-	reputaciones := s.Storage.ListarReputacion()
+	reputaciones := s.Reputacion.ListarReputacion()
 	RespondJSON(w, http.StatusOK, reputaciones)
 }
 
@@ -24,8 +24,8 @@ func (s *Server) ObtenerReputacion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reputacion, encontrado := s.Storage.BuscarReputacionPorID(id)
-	if !encontrado {
+	reputacion, err := s.Reputacion.BuscarReputacion(id)
+	if err != nil {
 		RespondError(w, http.StatusNotFound, "Reputacion no encontrada")
 		return
 	}
@@ -40,12 +40,11 @@ func (s *Server) CrearReputacion(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
 		return
 	}
-	if nueva.UsuarioID == 0 {
-		RespondError(w, http.StatusBadRequest, "El campo usuario_id es obligatorio")
-		return
-	}
 
-	creada := s.Storage.CrearReputacion(nueva)
+	creada, err := s.Reputacion.CrearReputacion(nueva)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
+	}
 	RespondJSON(w, http.StatusCreated, creada)
 }
 
@@ -62,14 +61,10 @@ func (s *Server) ActualizarReputacion(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
 		return
 	}
-	if datos.UsuarioID == 0 {
-		RespondError(w, http.StatusBadRequest, "El campo usuario_id es obligatorio")
-		return
-	}
 
-	actualizada, encontrada := s.Storage.ActualizarReputacion(id, datos)
-	if !encontrada {
-		RespondError(w, http.StatusNotFound, "Reputacion no encontrado")
+	actualizada, err := s.Reputacion.ActualizarReputacion(id, datos)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -84,8 +79,8 @@ func (s *Server) BorrarReputacion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.Storage.BorrarReputacion(id) {
-		RespondError(w, http.StatusNotFound, "Reputacion no encontrada")
+	if err := s.Reputacion.BorrarReputacion(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 

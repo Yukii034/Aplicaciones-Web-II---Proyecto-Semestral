@@ -12,7 +12,7 @@ import (
 
 // ListarLogroUsuario atiende GET /api/v1/logro_usuarios.
 func (s *Server) ListarLogro_Usuario(w http.ResponseWriter, _ *http.Request) {
-	logro_usuarios := s.Storage.ListarLogro_Usuario()
+	logro_usuarios := s.Logro_Usuario.ListarLogro_Usuario()
 	RespondJSON(w, http.StatusOK, logro_usuarios)
 }
 
@@ -24,9 +24,9 @@ func (s *Server) ObtenerLogro_Usuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logro_usuario, encontrado := s.Storage.BuscarLogro_UsuarioPorID(id)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "logro usuario no encontrada")
+	logro_usuario, err := s.Logro_Usuario.BuscarLogro_Usuario(id)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -40,17 +40,11 @@ func (s *Server) CrearLogro_Usuario(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
 		return
 	}
-	if nueva.UsuarioID == 0 {
-		RespondError(w, http.StatusBadRequest, "El campo usuario_id es obligatorio")
-		return
-	}
 
-	if nueva.LogroID == 0 {
-		RespondError(w, http.StatusBadRequest, "El campo usuario_id es obligatorio")
-		return
+	creada, err := s.Logro_Usuario.CrearLogro_Usuario(nueva)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 	}
-
-	creada := s.Storage.CrearLogro_Usuario(nueva)
 	RespondJSON(w, http.StatusCreated, creada)
 }
 
@@ -68,19 +62,9 @@ func (s *Server) ActualizarLogro_Usuario(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if datos.UsuarioID == 0 {
-		RespondError(w, http.StatusBadRequest, "El campo usuario_id es obligatorio")
-		return
-	}
-
-	if datos.LogroID == 0 {
-		RespondError(w, http.StatusBadRequest, "El campo logro_id es obligatorio")
-		return
-	}
-
-	actualizada, encontrada := s.Storage.ActualizarLogro_Usuario(id, datos)
-	if !encontrada {
-		RespondError(w, http.StatusNotFound, "logro usuario no encontrado")
+	actualizada, err := s.Logro_Usuario.ActualizarLogro_Usuario(id, datos)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -95,8 +79,8 @@ func (s *Server) BorrarLogro_Usuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.Storage.BorrarLogro_Usuario(id) {
-		RespondError(w, http.StatusNotFound, "logro usuario no encontrada")
+	if err := s.Logro_Usuario.BorrarLogro_Usuario(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 

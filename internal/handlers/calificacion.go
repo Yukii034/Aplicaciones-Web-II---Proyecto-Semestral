@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -13,7 +12,7 @@ import (
 
 // ListarCalificacion atiende GET /api/v1/calificaciones.
 func (s *Server) ListarCalificacion(w http.ResponseWriter, _ *http.Request) {
-	calificaciones := s.Storage.ListarCalificacion()
+	calificaciones := s.Calificacion.ListarCalificacion()
 	RespondJSON(w, http.StatusOK, calificaciones)
 }
 
@@ -25,9 +24,9 @@ func (s *Server) ObtenerCalificacion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Calificacion, encontrado := s.Storage.BuscarCalificacionPorID(id)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "Calificacion no encontrada")
+	Calificacion, err := s.Calificacion.BuscarCalificacion(id)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -42,17 +41,10 @@ func (s *Server) CrearCalificacion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strings.TrimSpace(nueva.Comentarios) == "" {
-		RespondError(w, http.StatusBadRequest, "El campo comentario es obligatorio")
-		return
+	creada, err := s.Calificacion.CrearCalificacion(nueva)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 	}
-
-	if nueva.UsuarioID == 0 {
-		RespondError(w, http.StatusBadRequest, "El campo usuario_id es obligatorio")
-		return
-	}
-
-	creada := s.Storage.CrearCalificacion(nueva)
 	RespondJSON(w, http.StatusCreated, creada)
 }
 
@@ -70,19 +62,9 @@ func (s *Server) ActualizarCalificacion(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if strings.TrimSpace(datos.Comentarios) == "" {
-		RespondError(w, http.StatusBadRequest, "El campo comentarios es obligatorio")
-		return
-	}
-
-	if datos.UsuarioID == 0 {
-		RespondError(w, http.StatusBadRequest, "El campo usuario_id es obligatorio")
-		return
-	}
-
-	actualizada, encontrada := s.Storage.ActualizarCalificacion(id, datos)
-	if !encontrada {
-		RespondError(w, http.StatusNotFound, "Calificacion no encontrado")
+	actualizada, err := s.Calificacion.ActualizarCalificacion(id, datos)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -97,8 +79,8 @@ func (s *Server) BorrarCalificacion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.Storage.BorrarCalificacion(id) {
-		RespondError(w, http.StatusNotFound, "Calificacion no encontrada")
+	if err := s.Calificacion.BorrarCalificacion(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 

@@ -14,6 +14,7 @@ import (
 	"proyecto-semestral/internal/models"
 	"proyecto-semestral/internal/service"
 	pi "proyecto-semestral/internal/service/modulo_pi" // agg la carpeta de cada servicio de cada modulo
+	rlc "proyecto-semestral/internal/service/modulo_rlc"
 	"proyecto-semestral/internal/storage"
 )
 
@@ -40,15 +41,19 @@ func main() {
 	// 2. Crear almacén y sembrar datos de ejemplo
 	almacen := storage.NuevoAlmacenSQLite(db) // conexion a la db
 
-	authService := service.NewAuthService(almacen)  // login y tokens
-	invService := pi.NewInventarioService(almacen)  // logica de inventario
-	pubService := pi.NewPublicacionService(almacen) // logica de publicacion
+	authService := service.NewAuthService(almacen)    // login y tokens
+	invService := pi.NewInventarioService(almacen)    // logica de inventario
+	pubService := pi.NewPublicacionService(almacen)   // logica de publicacion
+	repService := rlc.NewReputacionService(almacen)   // logica de reputacion
+	luService := rlc.NewLogro_UsuarioService(almacen) //logica de logro_usuario
+	lService := rlc.NewLogroService(almacen)          //logica de logro
+	caService := rlc.NewCalificacionService(almacen)
 	// agg de las demás entidades
 
 	// agrega el middleware de auth
 	authMW := middleware.Auth(authService) // proteccion de rutas
 
-	servidor := handlers.NewServer(invService, pubService, authService) // junta todos los servicios - agg de los demas
+	servidor := handlers.NewServer(invService, pubService, repService, luService, lService, caService, authService) // junta todos los servicios - agg de los demas
 
 	// 4. Router
 	r := chi.NewRouter()

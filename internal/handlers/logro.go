@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -13,7 +12,7 @@ import (
 
 // ListarLogro atiende GET /api/v1/logros.
 func (s *Server) ListarLogro(w http.ResponseWriter, _ *http.Request) {
-	logros := s.Storage.ListarLogro()
+	logros := s.Logro.ListarLogro()
 	RespondJSON(w, http.StatusOK, logros)
 }
 
@@ -25,9 +24,9 @@ func (s *Server) ObtenerLogro(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logro, encontrado := s.Storage.BuscarLogroPorID(id)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "Logro no encontrada")
+	logro, err := s.Logro.BuscarLogro(id)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -41,12 +40,12 @@ func (s *Server) CrearLogro(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
 		return
 	}
-	if strings.TrimSpace(nueva.Nombre) == "" {
-		RespondError(w, http.StatusBadRequest, "El campo nombre es obligatorio")
+
+	creada, err := s.Logro.CrearLogro(nueva)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
-	creada := s.Storage.CrearLogro(nueva)
 	RespondJSON(w, http.StatusCreated, creada)
 }
 
@@ -63,14 +62,10 @@ func (s *Server) ActualizarLogro(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
 		return
 	}
-	if strings.TrimSpace(datos.Nombre) == "" {
-		RespondError(w, http.StatusBadRequest, "El campo nombre es obligatorio")
-		return
-	}
 
-	actualizada, encontrada := s.Storage.ActualizarLogro(id, datos)
-	if !encontrada {
-		RespondError(w, http.StatusNotFound, "logro no encontrado")
+	actualizada, err := s.Logro.ActualizarLogro(id, datos)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
@@ -85,8 +80,8 @@ func (s *Server) BorrarLogro(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.Storage.BorrarLogro(id) {
-		RespondError(w, http.StatusNotFound, "Logro no encontrada")
+	if err := s.Logro.BorrarLogro(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
 
