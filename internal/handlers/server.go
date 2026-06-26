@@ -17,7 +17,14 @@ type Server struct {
 	// demás servicios de entidades
 }
 
-func NewServer(inv *pi.InventarioService, pub *pi.PublicacionService, rep *rlc.ReputacionService, lu *rlc.Logro_UsuarioService, l *rlc.LogroService, ca *rlc.CalificacionService, auth *service.AuthService) *Server {
+func NewServer(
+	inv *pi.InventarioService,
+	pub *pi.PublicacionService,
+	rep *rlc.ReputacionService,
+	lu *rlc.Logro_UsuarioService,
+	l *rlc.LogroService,
+	ca *rlc.CalificacionService,
+	auth *service.AuthService) *Server {
 	return &Server{
 		Inventario:    inv,
 		Publicacion:   pub,
