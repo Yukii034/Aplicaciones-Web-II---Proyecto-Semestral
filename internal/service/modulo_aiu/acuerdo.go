@@ -7,10 +7,10 @@ import (
 )
 
 type AcuerdoService struct {
-	repo storage.Almacen
+	repo storage.AcuerdoRepository
 }
 
-func NewAcuerdoService(repo storage.Almacen) *AcuerdoService {
+func NewAcuerdoService(repo storage.AcuerdoRepository) *AcuerdoService {
 	return &AcuerdoService{repo: repo}
 }
 
