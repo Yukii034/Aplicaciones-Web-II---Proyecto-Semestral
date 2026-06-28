@@ -95,7 +95,7 @@ func TestLogro_UsuarioService_Crear(t *testing.T) {
 
 func TestLogro_Usuario_Obtener_NoEncontrado(t *testing.T) {
 	repo := new(logro_usuarioRepoMock)
-	repo.On("BuscarLogro_usuarioPorID", 999).Return(models.Logro_Usuario{}, false)
+	repo.On("BuscarLogro_UsuarioPorID", 999).Return(models.Logro_Usuario{}, false)
 	svc := rlc.NewLogro_UsuarioService(repo)
 
 	_, err := svc.BuscarLogro_Usuario(999)

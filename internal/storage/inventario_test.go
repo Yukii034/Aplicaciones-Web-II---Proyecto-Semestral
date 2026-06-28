@@ -16,7 +16,10 @@ func nuevoDBMemoria(t *testing.T) *storage.AlmacenSQLite {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	require.NoError(t, err)
 
-	err = db.AutoMigrate(&models.Inventario{})
+	err = db.AutoMigrate(
+		&models.Inventario{},
+		&models.Logro{},
+	)
 	require.NoError(t, err)
 
 	return storage.NuevoAlmacenSQLite(db)
