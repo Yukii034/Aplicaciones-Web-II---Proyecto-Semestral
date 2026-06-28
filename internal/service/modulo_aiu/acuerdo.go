@@ -52,7 +52,8 @@ func (s *AcuerdoService) BorrarAcuerdo(id int) error {
 }
 
 func validarAcuerdo(a models.Acuerdo) error {
-	if a.ID == 0 {
+	// Valida campos reales de negocio, no el ID autoincremental
+	if a.PublicacionID == 0 || a.Tipo == "" {
 		return se.ErrVacio
 	}
 	return nil
