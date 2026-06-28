@@ -11,7 +11,7 @@ import (
 )
 
 func (s *Server) ListarUsuarios(w http.ResponseWriter, _ *http.Request) {
-	usuarios := s.Storage.ListarUsuarios()
+	usuarios := s.Usuario.ListarUsuarios()
 	RespondJSON(w, http.StatusOK, usuarios)
 }
 
@@ -21,7 +21,16 @@ func (s *Server) ObtenerUsuario(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
 	}
-	usuario, encontrado := s.Storage.BuscarUsuarioPorID(id)
+	usuarios := s.Usuario.ListarUsuarios()
+	var usuario models.Usuario
+	encontrado := false
+	for _, u := range usuarios {
+		if u.ID == id {
+			usuario = u
+			encontrado = true
+			break
+		}
+	}
 	if !encontrado {
 		RespondError(w, http.StatusNotFound, "Usuario no encontrado")
 		return
@@ -35,7 +44,7 @@ func (s *Server) CrearUsuario(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "Error al decodificar el cuerpo de la solicitud")
 		return
 	}
-	s.Storage.CrearUsuario(usuario)
+	s.Usuario.CrearUsuario(usuario)
 	RespondJSON(w, http.StatusCreated, usuario)
 }
 
@@ -51,7 +60,7 @@ func (s *Server) ActualizarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	usuario.ID = id
-	s.Storage.ActualizarUsuario(id, usuario)
+	s.Usuario.ActualizarUsuario(id, usuario)
 	RespondJSON(w, http.StatusOK, usuario)
 }
 
@@ -61,7 +70,7 @@ func (s *Server) EliminarUsuario(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
 	}
-	if !s.Storage.BorrarUsuario(id) {
+	if err := s.Usuario.BorrarUsuario(id); err != nil {
 		RespondError(w, http.StatusNotFound, "Usuario no encontrado")
 		return
 	}

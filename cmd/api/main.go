@@ -13,6 +13,7 @@ import (
 	"proyecto-semestral/internal/middleware"
 	"proyecto-semestral/internal/models"
 	"proyecto-semestral/internal/service"
+	aiu "proyecto-semestral/internal/service/modulo_aiu"
 	pi "proyecto-semestral/internal/service/modulo_pi" // agg la carpeta de cada servicio de cada modulo
 	rlc "proyecto-semestral/internal/service/modulo_rlc"
 	"proyecto-semestral/internal/storage"
@@ -48,12 +49,15 @@ func main() {
 	luService := rlc.NewLogro_UsuarioService(almacen) //logica de logro_usuario
 	lService := rlc.NewLogroService(almacen)          //logica de logro
 	caService := rlc.NewCalificacionService(almacen)
+	acIService := aiu.NewAcuerdoService(almacen)
+	acService := aiu.NewAcuerdoItemService(almacen)
+	userService := aiu.NewUsuarioService(almacen)
 	// agg de las demás entidades
 
 	// agrega el middleware de auth
 	authMW := middleware.Auth(authService) // proteccion de rutas
 
-	servidor := handlers.NewServer(invService, pubService, repService, luService, lService, caService, authService) // junta todos los servicios - agg de los demas
+	servidor := handlers.NewServer(invService, pubService, repService, luService, lService, caService, acIService, acService, userService, authService) // junta todos los servicios - agg de los demas
 
 	// 4. Router
 	r := chi.NewRouter()

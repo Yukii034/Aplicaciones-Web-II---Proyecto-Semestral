@@ -63,6 +63,116 @@ func (f *usuarioFake) BorrarUsuario(id int) bool {
 
 var _ storage.UserRepository = (*usuarioFake)(nil)
 
+type inventarioFake struct {
+	porID  map[int]models.Inventario
+	nextID int
+}
+
+func nuevoInventarioFake() *inventarioFake {
+	return &inventarioFake{
+		porID:  map[int]models.Inventario{},
+		nextID: 1,
+	}
+}
+
+func (f *inventarioFake) ListarInventario() []models.Inventario {
+	lista := make([]models.Inventario, 0, len(f.porID))
+	for _, item := range f.porID {
+		lista = append(lista, item)
+	}
+	return lista
+}
+
+func (f *inventarioFake) BuscarInventarioPorID(id int) (models.Inventario, bool) {
+	item, ok := f.porID[id]
+	return item, ok
+}
+
+func (f *inventarioFake) CrearInventario(inventario models.Inventario) models.Inventario {
+	inventario.ID = f.nextID
+	f.nextID++
+	f.porID[inventario.ID] = inventario
+	return inventario
+}
+
+func (f *inventarioFake) ActualizarInventario(id int, datos models.Inventario) (models.Inventario, bool) {
+	_, ok := f.porID[id]
+	if !ok {
+		return models.Inventario{}, false
+	}
+	datos.ID = id
+	f.porID[id] = datos
+	return datos, true
+}
+
+func (f *inventarioFake) BorrarInventario(id int) bool {
+	_, ok := f.porID[id]
+	if !ok {
+		return false
+	}
+	delete(f.porID, id)
+	return true
+}
+
+var _ storage.InventarioRepository = (*inventarioFake)(nil)
+
+type publicacionFake struct {
+	porID  map[int]models.Publicacion
+	nextID int
+}
+
+func nuevoPublicacionFake() *publicacionFake {
+	return &publicacionFake{
+		porID:  map[int]models.Publicacion{},
+		nextID: 1,
+	}
+}
+
+func (f *publicacionFake) ListarPublicaciones() []models.Publicacion {
+	lista := make([]models.Publicacion, 0, len(f.porID))
+	for _, item := range f.porID {
+		lista = append(lista, item)
+	}
+	return lista
+}
+
+func (f *publicacionFake) ListarPublicacion() []models.Publicacion {
+	return f.ListarPublicaciones()
+}
+
+func (f *publicacionFake) BuscarPublicacionPorID(id int) (models.Publicacion, bool) {
+	item, ok := f.porID[id]
+	return item, ok
+}
+
+func (f *publicacionFake) CrearPublicacion(publicacion models.Publicacion) models.Publicacion {
+	publicacion.ID = f.nextID
+	f.nextID++
+	f.porID[publicacion.ID] = publicacion
+	return publicacion
+}
+
+func (f *publicacionFake) ActualizarPublicacion(id int, datos models.Publicacion) (models.Publicacion, bool) {
+	_, ok := f.porID[id]
+	if !ok {
+		return models.Publicacion{}, false
+	}
+	datos.ID = id
+	f.porID[id] = datos
+	return datos, true
+}
+
+func (f *publicacionFake) BorrarPublicacion(id int) bool {
+	_, ok := f.porID[id]
+	if !ok {
+		return false
+	}
+	delete(f.porID, id)
+	return true
+}
+
+var _ storage.PublicacionRepository = (*publicacionFake)(nil)
+
 // construirEntorno arma el MISMO router que main.go (mismas rutas, mismo
 // middleware.Auth real) pero con almacen en memoria y repo de usuarios fake.
 // Devuelve el handler listo para httptest y un token valido ya emitido.
@@ -74,7 +184,7 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 
 	// fakes en memoria
 	invFake := nuevoInventarioFake() // supuestamente esto se arregla si se arreglan las otras entidades xd
-	pubFake := &publicacionFake{nextID: 1}
+	pubFake := nuevoPublicacionFake()
 	usuFake := nuevoUsuarioFake()
 
 	// services
@@ -83,7 +193,7 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 	authService := service.NewAuthService(usuFake)
 
 	// servidor con nil para los servicios de tus compañeros
-	srv := handlers.NewServer(invService, pubService, nil, nil, nil, nil, authService)
+	srv := handlers.NewServer(invService, pubService, nil, nil, nil, nil, nil, nil, nil, authService)
 
 	// router completo con middleware real
 	r := chi.NewRouter()

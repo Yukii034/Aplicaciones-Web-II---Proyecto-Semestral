@@ -11,7 +11,7 @@ import (
 )
 
 func (s *Server) ListarAcuerdoItem(w http.ResponseWriter, _ *http.Request) {
-	items := s.Storage.ListarAcuerdoItems()
+	items := s.AcuerdoItem.ListarAcuerdoItems()
 	RespondJSON(w, http.StatusOK, items)
 }
 
@@ -21,12 +21,14 @@ func (s *Server) ObtenerAcuerdoItem(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
 	}
-	item, encontrado := s.Storage.BuscarAcuerdoItemPorID(id)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "AcuerdoItem no encontrado")
-		return
+	items := s.AcuerdoItem.ListarAcuerdoItems()
+	for _, item := range items {
+		if item.ID == id {
+			RespondJSON(w, http.StatusOK, item)
+			return
+		}
 	}
-	RespondJSON(w, http.StatusOK, item)
+	RespondError(w, http.StatusNotFound, "AcuerdoItem no encontrado")
 }
 
 func (s *Server) CrearAcuerdoItem(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +37,7 @@ func (s *Server) CrearAcuerdoItem(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "Datos inválidos: "+err.Error())
 		return
 	}
-	s.Storage.CrearAcuerdoItem(item)
+	s.AcuerdoItem.CrearAcuerdoItem(item)
 	RespondJSON(w, http.StatusCreated, item)
 }
 
@@ -50,8 +52,8 @@ func (s *Server) ActualizarAcuerdoItem(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "Datos inválidos: "+err.Error())
 		return
 	}
-	updatedItem, ok := s.Storage.ActualizarAcuerdoItem(id, item)
-	if !ok {
+	updatedItem, err := s.AcuerdoItem.ActualizarAcuerdoItem(id, item)
+	if err != nil {
 		RespondError(w, http.StatusNotFound, "AcuerdoItem no encontrado")
 		return
 	}
@@ -64,8 +66,9 @@ func (s *Server) EliminarAcuerdoItem(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
 	}
-	if !s.Storage.BorrarAcuerdoItem(id) {
+	if err := s.AcuerdoItem.BorrarAcuerdoItem(id); err != nil {
 		RespondError(w, http.StatusNotFound, "AcuerdoItem no encontrado")
 		return
 	}
+	RespondJSON(w, http.StatusOK, map[string]string{"message": "AcuerdoItem eliminado correctamente"})
 }

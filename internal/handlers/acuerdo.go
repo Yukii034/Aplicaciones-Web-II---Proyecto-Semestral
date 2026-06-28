@@ -11,7 +11,7 @@ import (
 )
 
 func (s *Server) ListarAcuerdo(w http.ResponseWriter, _ *http.Request) {
-	acuerdos := s.Storage.ListarAcuerdos()
+	acuerdos := s.Acuerdo.ListarAcuerdos()
 	RespondJSON(w, http.StatusOK, acuerdos)
 }
 
@@ -21,7 +21,17 @@ func (s *Server) ObtenerAcuerdo(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
 	}
-	acuerdo, encontrado := s.Storage.BuscarAcuerdoPorID(id)
+	// Fallback: buscar en la lista de acuerdos si no existe un método ObtenerAcuerdo
+	acuerdos := s.Acuerdo.ListarAcuerdos()
+	var acuerdo models.Acuerdo
+	encontrado := false
+	for _, a := range acuerdos {
+		if a.ID == id {
+			acuerdo = a
+			encontrado = true
+			break
+		}
+	}
 	if !encontrado {
 		RespondError(w, http.StatusNotFound, "Acuerdo no encontrado")
 		return
@@ -35,7 +45,7 @@ func (s *Server) CrearAcuerdo(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "Datos inválidos: "+err.Error())
 		return
 	}
-	s.Storage.CrearAcuerdo(acuerdo)
+	s.Acuerdo.CrearAcuerdo(acuerdo)
 	RespondJSON(w, http.StatusCreated, acuerdo)
 }
 
@@ -50,8 +60,8 @@ func (s *Server) ActualizarAcuerdo(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "Datos inválidos: "+err.Error())
 		return
 	}
-	updatedAcuerdo, ok := s.Storage.ActualizarAcuerdo(id, acuerdo)
-	if !ok {
+	updatedAcuerdo, err := s.Acuerdo.ActualizarAcuerdo(id, acuerdo)
+	if err != nil {
 		RespondError(w, http.StatusNotFound, "Acuerdo no encontrado")
 		return
 	}
@@ -64,8 +74,9 @@ func (s *Server) EliminarAcuerdo(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
 	}
-	if !s.Storage.BorrarAcuerdo(id) {
+	if err := s.Acuerdo.BorrarAcuerdo(id); err != nil {
 		RespondError(w, http.StatusNotFound, "Acuerdo no encontrado")
 		return
 	}
+	RespondJSON(w, http.StatusOK, map[string]string{"message": "Acuerdo eliminado correctamente"})
 }
