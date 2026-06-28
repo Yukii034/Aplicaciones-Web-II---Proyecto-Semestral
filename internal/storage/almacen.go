@@ -68,7 +68,7 @@ type CalificacionRepository interface {
 	BorrarCalificacion(id int) bool
 }
 
-type Almacen interface {
+type AcuerdoRepository interface {
 
 	//Acuerdo
 	ListarAcuerdos() []models.Acuerdo
@@ -76,7 +76,9 @@ type Almacen interface {
 	CrearAcuerdo(acuerdo models.Acuerdo) models.Acuerdo
 	ActualizarAcuerdo(id int, datos models.Acuerdo) (models.Acuerdo, bool)
 	BorrarAcuerdo(id int) bool
+}
 
+type Acuerdo_ItemRepository interface {
 	//AcuerdoItem
 	ListarAcuerdoItems() []models.AcuerdoItem
 	BuscarAcuerdoItemPorID(id int) (models.AcuerdoItem, bool)
