@@ -19,8 +19,7 @@ import (
 	"proyecto-semestral/internal/storage"
 )
 
-// usuarioRepoFake: repositorio de usuarios en memoria para los tests de handler.
-// --- Fake de usuario (guarda de verdad para que register y login funcionen) ---
+// Fake de usuario (guarda de verdad para que register y login funcionen)
 type usuarioFake struct {
 	porEmail map[string]models.Usuario
 	nextID   int
@@ -33,24 +32,26 @@ func nuevoUsuarioFake() *usuarioFake {
 	}
 }
 
+// Funciones requeridas para el fake
+func (f *usuarioFake) BuscarUsuarioPorEmail(email string) (models.Usuario, bool) {
+	u, ok := f.porEmail[email]
+	return u, ok
+}
+
+func (f *usuarioFake) CrearUsuario(u models.Usuario) models.Usuario {
+	u.ID = f.nextID
+	f.nextID++
+	f.porEmail[u.Email] = u
+	return u
+}
+
+// las demás funciones solo existen para cumplir con la interfaz
 func (f *usuarioFake) ListarUsuarios() []models.Usuario {
 	return nil
 }
 
 func (f *usuarioFake) BuscarUsuarioPorID(id int) (models.Usuario, bool) {
 	return models.Usuario{}, false
-}
-
-func (f *usuarioFake) BuscarUsuarioPorEmail(email string) (models.Usuario, bool) {
-	u, ok := f.porEmail[email]
-	return u, ok
-}
-
-func (f *usuarioFake) CrearUsuario(usuario models.Usuario) models.Usuario {
-	usuario.ID = f.nextID
-	f.nextID++
-	f.porEmail[usuario.Email] = usuario
-	return usuario
 }
 
 func (f *usuarioFake) ActualizarUsuario(id int, datos models.Usuario) (models.Usuario, bool) {
@@ -61,138 +62,106 @@ func (f *usuarioFake) BorrarUsuario(id int) bool {
 	return false
 }
 
+// Verifica que usuarioFake cumple todos los métodos de UserRepository, es para saber si compila correctamente
 var _ storage.UserRepository = (*usuarioFake)(nil)
 
+// Fake de inventario
 type inventarioFake struct {
-	porID  map[int]models.Inventario
+	items  []models.Inventario
 	nextID int
 }
 
 func nuevoInventarioFake() *inventarioFake {
-	return &inventarioFake{
-		porID:  map[int]models.Inventario{},
-		nextID: 1,
-	}
+	return &inventarioFake{nextID: 1}
 }
 
 func (f *inventarioFake) ListarInventario() []models.Inventario {
-	lista := make([]models.Inventario, 0, len(f.porID))
-	for _, item := range f.porID {
-		lista = append(lista, item)
-	}
-	return lista
+	return f.items
 }
 
 func (f *inventarioFake) BuscarInventarioPorID(id int) (models.Inventario, bool) {
-	item, ok := f.porID[id]
-	return item, ok
+	for _, item := range f.items {
+		if item.ID == id {
+			return item, true
+		}
+	}
+	return models.Inventario{}, false
 }
 
-func (f *inventarioFake) CrearInventario(inventario models.Inventario) models.Inventario {
-	inventario.ID = f.nextID
+func (f *inventarioFake) CrearInventario(i models.Inventario) models.Inventario {
+	i.ID = f.nextID
 	f.nextID++
-	f.porID[inventario.ID] = inventario
-	return inventario
+	f.items = append(f.items, i)
+	return i
 }
 
 func (f *inventarioFake) ActualizarInventario(id int, datos models.Inventario) (models.Inventario, bool) {
-	_, ok := f.porID[id]
-	if !ok {
-		return models.Inventario{}, false
-	}
-	datos.ID = id
-	f.porID[id] = datos
-	return datos, true
+	return models.Inventario{}, false
 }
 
 func (f *inventarioFake) BorrarInventario(id int) bool {
-	_, ok := f.porID[id]
-	if !ok {
-		return false
-	}
-	delete(f.porID, id)
-	return true
+	return false
 }
 
 var _ storage.InventarioRepository = (*inventarioFake)(nil)
 
+// Fake de publicacion
 type publicacionFake struct {
-	porID  map[int]models.Publicacion
+	items  []models.Publicacion
 	nextID int
 }
 
 func nuevoPublicacionFake() *publicacionFake {
-	return &publicacionFake{
-		porID:  map[int]models.Publicacion{},
-		nextID: 1,
-	}
-}
-
-func (f *publicacionFake) ListarPublicaciones() []models.Publicacion {
-	lista := make([]models.Publicacion, 0, len(f.porID))
-	for _, item := range f.porID {
-		lista = append(lista, item)
-	}
-	return lista
+	return &publicacionFake{nextID: 1}
 }
 
 func (f *publicacionFake) ListarPublicacion() []models.Publicacion {
-	return f.ListarPublicaciones()
+	return f.items
 }
 
 func (f *publicacionFake) BuscarPublicacionPorID(id int) (models.Publicacion, bool) {
-	item, ok := f.porID[id]
-	return item, ok
+	for _, item := range f.items {
+		if item.ID == id {
+			return item, true
+		}
+	}
+	return models.Publicacion{}, false
 }
 
-func (f *publicacionFake) CrearPublicacion(publicacion models.Publicacion) models.Publicacion {
-	publicacion.ID = f.nextID
+func (f *publicacionFake) CrearPublicacion(p models.Publicacion) models.Publicacion {
+	p.ID = f.nextID
 	f.nextID++
-	f.porID[publicacion.ID] = publicacion
-	return publicacion
+	f.items = append(f.items, p)
+	return p
 }
 
 func (f *publicacionFake) ActualizarPublicacion(id int, datos models.Publicacion) (models.Publicacion, bool) {
-	_, ok := f.porID[id]
-	if !ok {
-		return models.Publicacion{}, false
-	}
-	datos.ID = id
-	f.porID[id] = datos
-	return datos, true
+	return models.Publicacion{}, false
 }
 
 func (f *publicacionFake) BorrarPublicacion(id int) bool {
-	_, ok := f.porID[id]
-	if !ok {
-		return false
-	}
-	delete(f.porID, id)
-	return true
+	return false
 }
 
 var _ storage.PublicacionRepository = (*publicacionFake)(nil)
 
 // construirEntorno arma el MISMO router que main.go (mismas rutas, mismo
-// middleware.Auth real) pero con almacen en memoria y repo de usuarios fake.
+// middleware.Auth real) pero con almacen en memoria y repos fake.
 // Devuelve el handler listo para httptest y un token valido ya emitido.
-//
-// Clave pedagogica: probamos a traves del middleware REAL, no de uno simplificado.
-// Si el wiring de la ruta protegida se rompe, este test se entera.
 func construirEntorno(t *testing.T) (http.Handler, string) {
 	t.Helper()
 
 	// fakes en memoria
-	invFake := nuevoInventarioFake() // supuestamente esto se arregla si se arreglan las otras entidades xd
+	invFake := nuevoInventarioFake()
 	pubFake := nuevoPublicacionFake()
 	usuFake := nuevoUsuarioFake()
 
-	// services
+	// servicios con los fake a agregar
 	invService := pi.NewInventarioService(invFake)
 	pubService := pi.NewPublicacionService(pubFake)
 	authService := service.NewAuthService(usuFake)
 
-	// servidor con nil para los servicios de tus compañeros
+	// servidores con nil para los servicios de las demás entidades (solo para los que se están usando)
 	srv := handlers.NewServer(invService, pubService, nil, nil, nil, nil, nil, nil, nil, authService)
 
 	// router completo con middleware real
@@ -201,6 +170,7 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 		r.Post("/auth/register", srv.Registrar)
 		r.Post("/auth/login", srv.Login)
 
+		// rutas protegidas con autenticación
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.Auth(authService))
 			r.Get("/inventario", srv.ListarInventario)
@@ -212,14 +182,16 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 	return r, token
 }
 
+// hace el proceso de registro de usuario y se obtiene el token requerido para acceder a rutas protegidas
 func registrarYObtenerToken(t *testing.T, h http.Handler) string {
-	t.Helper()
+	t.Helper() // para que go sepa que es una helper de un test, este apunta a quién llamó a esta funcion y no a la propia funcion
 	cred := `{"email":"test@test.com","password":"secreta123"}`
 
+	// registra simulando un post y convierte el json en un lector que el request puede enviar como body
 	reqReg := httptest.NewRequest(http.MethodPost, "/api/v1/auth/register", strings.NewReader(cred))
-	h.ServeHTTP(httptest.NewRecorder(), reqReg)
+	h.ServeHTTP(httptest.NewRecorder(), reqReg) // captura el request contra el router
 
-	reqLogin := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", strings.NewReader(cred))
+	reqLogin := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", strings.NewReader(cred)) // se loggea
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, reqLogin)
 	require.Equal(t, http.StatusOK, rec.Code)
@@ -227,7 +199,7 @@ func registrarYObtenerToken(t *testing.T, h http.Handler) string {
 	var resp struct {
 		Token string `json:"token"`
 	}
-	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp)) // recoge el toquen en json y lo cambia a string
 	require.NotEmpty(t, resp.Token)
 	return resp.Token
 }
