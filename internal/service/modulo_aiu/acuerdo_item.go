@@ -52,7 +52,8 @@ func (s *AcuerdoItemService) BorrarAcuerdoItem(id int) error {
 }
 
 func validarAcuerdoItem(a models.AcuerdoItem) error {
-	if a.ID == 0 {
+	// El ID no se debe validar aquí en la creación/actualización si es autoincremental
+	if a.AcuerdoID == 0 || a.InventarioID == 0 || a.Rol == "" {
 		return se.ErrVacio
 	}
 	return nil
