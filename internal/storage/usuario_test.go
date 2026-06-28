@@ -3,30 +3,15 @@ package storage_test
 import (
 	"testing"
 
-	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 
 	"proyecto-semestral/internal/models"
-	"proyecto-semestral/internal/storage"
 )
-
-// nuevoDBMemoriaUsuario migra el modelo de Usuario a una base de datos SQLite en memoria
-func nuevoDBMemoriaUsuario(t *testing.T) *storage.AlmacenSQLite {
-	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	require.NoError(t, err)
-
-	// Migramos el modelo de Usuario
-	err = db.AutoMigrate(&models.Usuario{})
-	require.NoError(t, err)
-
-	return storage.NuevoAlmacenSQLite(db)
-}
 
 func TestAlmacen_CrearYBuscarUsuario(t *testing.T) {
 	// Arrange - Configura la DB en memoria
-	almacen := nuevoDBMemoriaUsuario(t)
+	almacen := nuevoDBMemoria(t)
 
 	// Act - Crea un nuevo usuario
 	creado := almacen.CrearUsuario(models.Usuario{
@@ -50,7 +35,7 @@ func TestAlmacen_CrearYBuscarUsuario(t *testing.T) {
 
 func TestAlmacen_BuscarUsuarioPorEmail(t *testing.T) {
 	// Arrange
-	almacen := nuevoDBMemoriaUsuario(t)
+	almacen := nuevoDBMemoria(t)
 	almacen.CrearUsuario(models.Usuario{
 		Nombre: "Maria",
 		Email:  "maria@example.com",
@@ -67,7 +52,7 @@ func TestAlmacen_BuscarUsuarioPorEmail(t *testing.T) {
 
 func TestAlmacen_ListarUsuarios(t *testing.T) {
 	// Arrange
-	almacen := nuevoDBMemoriaUsuario(t)
+	almacen := nuevoDBMemoria(t)
 	almacen.CrearUsuario(models.Usuario{Nombre: "User 1", Email: "u1@test.com", Tipo: "user"})
 	almacen.CrearUsuario(models.Usuario{Nombre: "User 2", Email: "u2@test.com", Tipo: "user"})
 
@@ -80,7 +65,7 @@ func TestAlmacen_ListarUsuarios(t *testing.T) {
 
 func TestAlmacen_ActualizarUsuario(t *testing.T) {
 	// Arrange
-	almacen := nuevoDBMemoriaUsuario(t)
+	almacen := nuevoDBMemoria(t)
 	creado := almacen.CrearUsuario(models.Usuario{
 		Nombre: "Carlos",
 		Email:  "carlos@test.com",
@@ -104,7 +89,7 @@ func TestAlmacen_ActualizarUsuario(t *testing.T) {
 
 func TestAlmacen_BorrarUsuario(t *testing.T) {
 	// Arrange
-	almacen := nuevoDBMemoriaUsuario(t)
+	almacen := nuevoDBMemoria(t)
 	creado := almacen.CrearUsuario(models.Usuario{Nombre: "Borrar Me", Email: "borrame@test.com", Tipo: "user"})
 
 	// Act
@@ -120,7 +105,7 @@ func TestAlmacen_BorrarUsuario(t *testing.T) {
 
 func TestAlmacen_BuscarUsuarioInexistente(t *testing.T) {
 	// Arrange
-	almacen := nuevoDBMemoriaUsuario(t)
+	almacen := nuevoDBMemoria(t)
 
 	// Act & Assert para ID inexistente
 	_, okID := almacen.BuscarUsuarioPorID(999)

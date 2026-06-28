@@ -19,6 +19,7 @@ func nuevoDBMemoria(t *testing.T) *storage.AlmacenSQLite {
 	err = db.AutoMigrate(
 		&models.Inventario{},
 		&models.Logro{},
+		&models.Usuario{},
 	)
 	require.NoError(t, err)
 
