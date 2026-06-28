@@ -105,46 +105,6 @@ func (f *inventarioFake) BorrarInventario(id int) bool {
 
 var _ storage.InventarioRepository = (*inventarioFake)(nil)
 
-// Fake de publicacion
-type publicacionFake struct {
-	items  []models.Publicacion
-	nextID int
-}
-
-func nuevoPublicacionFake() *publicacionFake {
-	return &publicacionFake{nextID: 1}
-}
-
-func (f *publicacionFake) ListarPublicacion() []models.Publicacion {
-	return f.items
-}
-
-func (f *publicacionFake) BuscarPublicacionPorID(id int) (models.Publicacion, bool) {
-	for _, item := range f.items {
-		if item.ID == id {
-			return item, true
-		}
-	}
-	return models.Publicacion{}, false
-}
-
-func (f *publicacionFake) CrearPublicacion(p models.Publicacion) models.Publicacion {
-	p.ID = f.nextID
-	f.nextID++
-	f.items = append(f.items, p)
-	return p
-}
-
-func (f *publicacionFake) ActualizarPublicacion(id int, datos models.Publicacion) (models.Publicacion, bool) {
-	return models.Publicacion{}, false
-}
-
-func (f *publicacionFake) BorrarPublicacion(id int) bool {
-	return false
-}
-
-var _ storage.PublicacionRepository = (*publicacionFake)(nil)
-
 // construirEntorno arma el MISMO router que main.go (mismas rutas, mismo
 // middleware.Auth real) pero con almacen en memoria y repos fake.
 // Devuelve el handler listo para httptest y un token valido ya emitido.
@@ -153,16 +113,14 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 
 	// fakes en memoria
 	invFake := nuevoInventarioFake()
-	pubFake := nuevoPublicacionFake()
 	usuFake := nuevoUsuarioFake()
 
 	// servicios con los fake a agregar
 	invService := pi.NewInventarioService(invFake)
-	pubService := pi.NewPublicacionService(pubFake)
 	authService := service.NewAuthService(usuFake)
 
 	// servidores con nil para los servicios de las demás entidades (solo para los que se están usando)
-	srv := handlers.NewServer(invService, pubService, nil, nil, nil, nil, nil, nil, nil, authService)
+	srv := handlers.NewServer(invService, nil, nil, nil, nil, nil, nil, nil, nil, authService)
 
 	// router completo con middleware real
 	r := chi.NewRouter()
@@ -189,43 +147,45 @@ func registrarYObtenerToken(t *testing.T, h http.Handler) string {
 
 	// registra simulando un post y convierte el json en un lector que el request puede enviar como body
 	reqReg := httptest.NewRequest(http.MethodPost, "/api/v1/auth/register", strings.NewReader(cred))
-	h.ServeHTTP(httptest.NewRecorder(), reqReg) // captura el request contra el router
+	h.ServeHTTP(httptest.NewRecorder(), reqReg) // captura el request contra el router, no guarda la respuesta, solo que se registra
 
 	reqLogin := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", strings.NewReader(cred)) // se loggea
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, reqLogin)
-	require.Equal(t, http.StatusOK, rec.Code)
+	h.ServeHTTP(rec, reqLogin)                // guarda la respuesta ya que se necesita leer el token
+	require.Equal(t, http.StatusOK, rec.Code) // recoge el codigo de estatus que mandó el servidor
 
 	var resp struct {
 		Token string `json:"token"`
 	}
-	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp)) // recoge el toquen en json y lo cambia a string
-	require.NotEmpty(t, resp.Token)
-	return resp.Token
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp)) // recoge el token en json y lo lee como string
+	require.NotEmpty(t, resp.Token)                             // revisa que no esté vacío
+	return resp.Token                                           // devuelve el token como string
 }
 
-// TestCrearProducto_Exitoso: POST con token y cuerpo valido -> 201 Created.
+// TestCrearProducto_Exitoso: POST con token y cuerpo valido -> 201 Creado
 func TestCrearInventario_Exitoso(t *testing.T) {
-	h, token := construirEntorno(t)
+	h, token := construirEntorno(t) // construye el server con el token ya guardado
 	body := `{"nombre":"Laptop Dell","categoria":"Tecnología","cantidad":1}`
 
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/inventario", strings.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/inventario", strings.NewReader(body)) // hace un post creando un inventario nuevo
+	// agrega el token al header del request, escoge la autorizacion para un bearer token, mandando luego el token como string
+	// el middleware jwt espera un header con Bearer y el token
 	req.Header.Set("Authorization", "Bearer "+token)
-	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, req)
+	rec := httptest.NewRecorder() // captura todo lo que el handler responda, codigo, headers y body
+	h.ServeHTTP(rec, req)         // envía el request
 
-	require.Equal(t, http.StatusCreated, rec.Code)
+	require.Equal(t, http.StatusCreated, rec.Code) // asegura que salga el codigo 201 de creado
 }
 
 // TestRutaProtegida_SinToken: sin header Authorization, el middleware corta
-// antes de llegar al handler -> 401 Unauthorized.
+// antes de llegar al handler -> 401 Sin autorizar
 func TestRutaProtegida_SinToken(t *testing.T) {
-	h, _ := construirEntorno(t)
+	h, _ := construirEntorno(t) // construye el server sin token gardado
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/inventario", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/inventario", nil) // hace un get para listar inventario
 	// sin token a propósito
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 
-	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	assert.Equal(t, http.StatusUnauthorized, rec.Code) // se espera que salga el codigo 401 sin autorizar, ya que no tiene token
 }
