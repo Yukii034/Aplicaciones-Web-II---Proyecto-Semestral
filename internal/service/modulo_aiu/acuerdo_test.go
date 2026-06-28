@@ -13,7 +13,7 @@ import (
 	"proyecto-semestral/internal/storage"
 )
 
-// --- Mock ---
+// --- Mock Compartido ---
 // Doble de prueba del repositorio de acuerdos
 type acuerdoRepoMock struct {
 	mock.Mock
@@ -72,7 +72,7 @@ func (m *acuerdoRepoMock) BuscarAcuerdoItemPorID(id int) (models.AcuerdoItem, bo
 // Red de seguridad para asegurar que implementa la interfaz del storage de acuerdos
 var _ storage.Almacen = (*acuerdoRepoMock)(nil)
 
-// --- Tests ---
+// --- Tests de Acuerdo ---
 
 // Test con estructura Table Driven para la creación de un acuerdo
 func TestAcuerdoService_Crear(t *testing.T) {
@@ -91,7 +91,7 @@ func TestAcuerdoService_Crear(t *testing.T) {
 				Tipo:          "Intercambio",
 				Estado:        "Pendiente",
 			},
-			errEsperado:   service.ErrVacio, // O el error de validación que manejes para IDs obligatorios
+			errEsperado:   service.ErrVacio,
 			debePersistir: false,
 		},
 		{
@@ -129,7 +129,7 @@ func TestAcuerdoService_Crear(t *testing.T) {
 
 			if c.debePersistir {
 				guardado := c.entrada
-				guardado.ID = 1 // Simula el ID autoincremental que genera tu DB/GORM
+				guardado.ID = 1
 				guardado.CreatedAt = "2026-06-28"
 				guardado.UpdatedAt = "2026-06-28"
 				repo.On("CrearAcuerdo", c.entrada).Return(guardado)
@@ -179,123 +179,6 @@ func TestAcuerdoService_Borrar_NoEncontrado(t *testing.T) {
 
 	// Act
 	err := svc.BorrarAcuerdo(999)
-
-	// Assert
-	require.ErrorIs(t, err, service.ErrNoEncontrado)
-	repo.AssertExpectations(t)
-}
-
-// --- Tests para AcuerdoItem ---
-
-// Test con estructura Table Driven para la creación de un AcuerdoItem
-func TestAcuerdoService_CrearItem(t *testing.T) {
-	casos := []struct {
-		nombre        string
-		entrada       models.AcuerdoItem
-		errEsperado   error
-		debePersistir bool
-	}{
-		{
-			nombre: "AcuerdoID inválido (0) -> ErrVacio",
-			entrada: models.AcuerdoItem{
-				AcuerdoID:    0,
-				InventarioID: 45,
-				Rol:          "Ofertado",
-			},
-			errEsperado:   service.ErrVacio,
-			debePersistir: false,
-		},
-		{
-			nombre: "InventarioID inválido (0) -> ErrVacio",
-			entrada: models.AcuerdoItem{
-				AcuerdoID:    12,
-				InventarioID: 0,
-				Rol:          "Solicitado",
-			},
-			errEsperado:   service.ErrVacio,
-			debePersistir: false,
-		},
-		{
-			nombre: "Rol vacío -> ErrVacio",
-			entrada: models.AcuerdoItem{
-				AcuerdoID:    12,
-				InventarioID: 45,
-				Rol:          "",
-			},
-			errEsperado:   service.ErrVacio,
-			debePersistir: false,
-		},
-		{
-			nombre: "AcuerdoItem válido -> sin error y se persiste",
-			entrada: models.AcuerdoItem{
-				AcuerdoID:    12,
-				InventarioID: 45,
-				Rol:          "Ofertado",
-			},
-			errEsperado:   nil,
-			debePersistir: true,
-		},
-	}
-
-	for _, c := range casos {
-		t.Run(c.nombre, func(t *testing.T) {
-			// Arrange
-			repo := new(acuerdoRepoMock)
-
-			if c.debePersistir {
-				guardado := c.entrada
-				guardado.ID = 1 // Simula el ID autoincremental de la base de datos
-				repo.On("CrearAcuerdoItem", c.entrada).Return(guardado)
-			}
-
-			// Inicializamos el servicio usando el mock completo
-			svc := aiu.NewAcuerdoItemService(repo)
-
-			// Act
-			// Nota: Ajusta el nombre de este método según cómo lo nombres en tu service de Go
-			creado, err := svc.CrearAcuerdoItem(c.entrada)
-
-			// Assert
-			if c.errEsperado != nil {
-				require.ErrorIs(t, err, c.errEsperado)
-				repo.AssertNotCalled(t, "CrearAcuerdoItem")
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, 1, creado.ID)
-				repo.AssertCalled(t, "CrearAcuerdoItem", c.entrada)
-			}
-		})
-	}
-}
-
-// Test para buscar un AcuerdoItem que no existe
-func TestAcuerdoService_BuscarItem_NoEncontrado(t *testing.T) {
-	// Arrange
-	repo := new(acuerdoRepoMock)
-	repo.On("BuscarAcuerdoItemPorID", 999).Return(models.AcuerdoItem{}, false)
-
-	svc := aiu.NewAcuerdoItemService(repo)
-
-	// Act
-	// Nota: Ajusta el nombre de este método según tu implementación del service
-	_, err := svc.BuscarAcuerdoItem(999)
-
-	// Assert
-	require.ErrorIs(t, err, service.ErrNoEncontrado)
-	repo.AssertExpectations(t)
-}
-
-// Test para borrar un AcuerdoItem que no existe
-func TestAcuerdoService_BorrarItem_NoEncontrado(t *testing.T) {
-	// Arrange
-	repo := new(acuerdoRepoMock)
-	repo.On("BorrarAcuerdoItem", 999).Return(false)
-
-	svc := aiu.NewAcuerdoItemService(repo)
-
-	// Act
-	// Nota: Ajusta el nombre de este método según tu implementación del service
-	err := svc.BorrarAcuerdoItem(999)
 
 	// Assert
 	require.ErrorIs(t, err, service.ErrNoEncontrado)
