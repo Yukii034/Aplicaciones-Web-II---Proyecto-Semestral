@@ -12,6 +12,4 @@ func NuevoAlmacenSQLite(db *gorm.DB) *AlmacenSQLite {
 	return &AlmacenSQLite{db: db}
 }
 
-type Almacen interface{}
-
-var _ Almacen = (*AlmacenSQLite)(nil)
+// var _ Almacen = (*AlmacenSQLite)(nil)

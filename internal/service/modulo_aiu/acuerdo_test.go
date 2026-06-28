@@ -70,7 +70,7 @@ func (m *acuerdoRepoMock) BuscarAcuerdoItemPorID(id int) (models.AcuerdoItem, bo
 }
 
 // Red de seguridad para asegurar que implementa la interfaz del storage de acuerdos
-var _ storage.Almacen = (*acuerdoRepoMock)(nil)
+var _ storage.AcuerdoRepository = (*acuerdoRepoMock)(nil)
 
 // --- Tests de Acuerdo ---
 
