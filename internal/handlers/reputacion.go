@@ -3,9 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"proyecto-semestral/internal/models"
 )
@@ -18,7 +15,7 @@ func (s *Server) ListarReputacion(w http.ResponseWriter, _ *http.Request) {
 
 // ObtenerReputacion atiende GET /api/v1/reputaciones/{id}.
 func (s *Server) ObtenerReputacion(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -50,7 +47,7 @@ func (s *Server) CrearReputacion(w http.ResponseWriter, r *http.Request) {
 
 // ActualizarReputacion atiende PUT /api/v1/reputaciones/{id}.
 func (s *Server) ActualizarReputacion(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -73,7 +70,7 @@ func (s *Server) ActualizarReputacion(w http.ResponseWriter, r *http.Request) {
 
 // BorrarReputacion atiende DELETE /api/v1/reputaciones/{id}.
 func (s *Server) BorrarReputacion(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return

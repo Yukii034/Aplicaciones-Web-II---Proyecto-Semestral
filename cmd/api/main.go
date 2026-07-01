@@ -2,14 +2,15 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/glebarez/sqlite"
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"gorm.io/gorm"
 
+	"proyecto-semestral/internal/config"
 	"proyecto-semestral/internal/handlers"
+	"proyecto-semestral/internal/httpserver"
 	"proyecto-semestral/internal/middleware"
 	"proyecto-semestral/internal/models"
 	"proyecto-semestral/internal/service"
@@ -21,7 +22,8 @@ import (
 
 func main() {
 	// 1. Abrir SQLite y migrar
-	db, err := gorm.Open(sqlite.Open("proyecto.db"), &gorm.Config{})
+	cfg := config.Cargar()
+	db, err := gorm.Open(sqlite.Open(cfg.RutaDB), &gorm.Config{})
 	if err != nil {
 		log.Fatal("no se pudo abrir la base de datos: ", err)
 	}
@@ -42,7 +44,7 @@ func main() {
 	// 2. Crear almacén y sembrar datos de ejemplo
 	almacen := storage.NuevoAlmacenSQLite(db) // conexion a la db
 
-	authService := service.NewAuthService(almacen)    // login y tokens
+	authService := service.NuevoAuthService(almacen)  // login y tokens
 	invService := pi.NewInventarioService(almacen)    // logica de inventario
 	pubService := pi.NewPublicacionService(almacen)   // logica de publicacion
 	repService := rlc.NewReputacionService(almacen)   // logica de reputacion
@@ -57,7 +59,18 @@ func main() {
 	// agrega el middleware de auth
 	authMW := middleware.Auth(authService) // proteccion de rutas
 
-	servidor := handlers.NewServer(invService, pubService, repService, luService, lService, caService, acIService, acService, userService, authService) // junta todos los servicios - agg de los demas
+	servidor := handlers.NewServer(handlers.Deps{
+		Inventario:    invService,
+		Publicacion:   pubService,
+		Reputacion:    repService,
+		Logro_Usuario: luService,
+		Logro:         lService,
+		Calificacion:  caService,
+		Acuerdo:       acIService,
+		AcuerdoItem:   acService,
+		Usuario:       userService,
+		Auth:          authService,
+	})
 
 	// 4. Router
 	r := chi.NewRouter()
@@ -131,6 +144,7 @@ func main() {
 		})
 	})
 
+	srv := httpserver.Nuevo(r)
 	log.Println("Servidor escuchando en http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(srv.ListenAndServe())
 }

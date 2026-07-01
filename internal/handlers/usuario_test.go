@@ -91,13 +91,13 @@ func construirEntornoUsuarios(t *testing.T) (http.Handler, string) {
 	usuFake := nuevoUsuarioFake()
 
 	// 2. Instanciar los servicios del sistema
-	authService := service.NewAuthService(usuFake)
+	authService := service.NuevoAuthService(usuFake)
 
 	// Usando el alias 'aiu' correctamente
 	uService := aiu.NewUsuarioService(usuFake)
 
 	// 3. Crear el servidor pasando tu servicio AIU
-	srv := handlers.NewServer(nil, nil, nil, nil, nil, nil, nil, nil, uService, authService)
+	srv := handlers.NewServer(handlers.Deps{Usuario: uService, Auth: authService})
 
 	// 4. Configurar el Router con Middleware Real y tus endpoints
 	r := chi.NewRouter()

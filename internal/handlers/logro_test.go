@@ -76,7 +76,7 @@ func construirEntornoLogro(t *testing.T) http.Handler {
 	logService := rlc.NewLogroService(logFake)
 
 	// nil para todos los servicios excepto Logro (5ta posición)
-	srv := handlers.NewServer(nil, nil, nil, nil, logService, nil, nil, nil, nil, nil)
+	srv := handlers.NewServer(handlers.Deps{Logro: logService})
 
 	r := chi.NewRouter()
 	r.Route("/api/v1", func(r chi.Router) {

@@ -3,9 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"proyecto-semestral/internal/models"
 )
@@ -16,7 +13,7 @@ func (s *Server) ListarUsuarios(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *Server) ObtenerUsuario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -49,7 +46,7 @@ func (s *Server) CrearUsuario(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ActualizarUsuario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -65,7 +62,7 @@ func (s *Server) ActualizarUsuario(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) EliminarUsuario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return

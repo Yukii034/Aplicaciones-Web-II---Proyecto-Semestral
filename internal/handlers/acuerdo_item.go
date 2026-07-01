@@ -3,9 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"proyecto-semestral/internal/models"
 )
@@ -16,7 +13,7 @@ func (s *Server) ListarAcuerdoItem(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *Server) ObtenerAcuerdoItem(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r) // cambiado por el params.go
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -42,7 +39,7 @@ func (s *Server) CrearAcuerdoItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ActualizarAcuerdoItem(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -61,7 +58,7 @@ func (s *Server) ActualizarAcuerdoItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) EliminarAcuerdoItem(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return

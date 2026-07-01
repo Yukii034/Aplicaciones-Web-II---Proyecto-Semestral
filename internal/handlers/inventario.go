@@ -3,10 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 
 	"proyecto-semestral/internal/models"
 )
@@ -19,7 +16,7 @@ func (s *Server) ListarInventario(w http.ResponseWriter, _ *http.Request) {
 
 // ObtenerInventario atiende GET /api/v1/inventarios/{id}.
 func (s *Server) ObtenerInventario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -56,7 +53,7 @@ func (s *Server) CrearInventario(w http.ResponseWriter, r *http.Request) {
 
 // ActualizarInventario atiende PUT /api/v1/inventarios/{id}.
 func (s *Server) ActualizarInventario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -83,7 +80,7 @@ func (s *Server) ActualizarInventario(w http.ResponseWriter, r *http.Request) {
 
 // BorrarInventario atiende DELETE /api/v1/inventarios/{id}.
 func (s *Server) BorrarInventario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return

@@ -7,6 +7,11 @@ import (
 	rlc "proyecto-semestral/internal/service/modulo_rlc"
 )
 
+// Server agrupa los servicios de los que dependen los handlers.
+//
+// Guarda la capa de servicio (no el storage directo): los handlers quedan
+// delgados: decodifican el request, llaman al servicio y traducen el resultado
+// a HTTP.
 type Server struct {
 	Inventario    *pi.InventarioService
 	Publicacion   *pi.PublicacionService
@@ -21,29 +26,38 @@ type Server struct {
 	// demás servicios de entidades
 }
 
-func NewServer(
-	inv *pi.InventarioService,
-	pub *pi.PublicacionService,
-	rep *rlc.ReputacionService,
-	lu *rlc.Logro_UsuarioService,
-	l *rlc.LogroService,
-	ca *rlc.CalificacionService,
-	ac *aiu.AcuerdoService,
-	acI *aiu.AcuerdoItemService,
-	user *aiu.UsuarioService,
-	auth *service.AuthService) *Server {
+// Deps agrupa las dependencias requeridas para construir un Server.
+//
+// Antes NewServer recibia un parametro posicional por servicio; agregar una
+// entidad obligaba a cambiar la firma Y todos los call-sites, y dos parametros
+// del mismo tipo eran faciles de intercambiar por error. Con un struct de
+// dependencias y campos NOMBRADOS, agregar una entidad es agregar un campo:
+// nada mas se rompe y desaparece el riesgo de intercambiar argumentos.
+type Deps struct {
+	Inventario    *pi.InventarioService
+	Publicacion   *pi.PublicacionService
+	Reputacion    *rlc.ReputacionService
+	Logro_Usuario *rlc.Logro_UsuarioService
+	Logro         *rlc.LogroService
+	Calificacion  *rlc.CalificacionService
+	Acuerdo       *aiu.AcuerdoService
+	AcuerdoItem   *aiu.AcuerdoItemService
+	Usuario       *aiu.UsuarioService
+	Auth          *service.AuthService
+}
 
+// NewServer construye un Server a partir de sus dependencias.
+func NewServer(d Deps) *Server {
 	return &Server{
-		Inventario:    inv,
-		Publicacion:   pub,
-		Reputacion:    rep,
-		Logro_Usuario: lu,
-		Logro:         l,
-		Calificacion:  ca,
-		Acuerdo:       ac,
-		AcuerdoItem:   acI,
-		Usuario:       user,
-		Auth:          auth,
-		// añadir cada nuevo servicio
+		Inventario:    d.Inventario,
+		Publicacion:   d.Publicacion,
+		Reputacion:    d.Reputacion,
+		Logro_Usuario: d.Logro_Usuario,
+		Logro:         d.Logro,
+		Calificacion:  d.Calificacion,
+		Acuerdo:       d.Acuerdo,
+		AcuerdoItem:   d.AcuerdoItem,
+		Usuario:       d.Usuario,
+		Auth:          d.Auth,
 	}
 }

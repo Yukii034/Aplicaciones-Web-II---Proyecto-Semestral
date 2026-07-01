@@ -117,10 +117,10 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 
 	// servicios con los fake a agregar
 	invService := pi.NewInventarioService(invFake)
-	authService := service.NewAuthService(usuFake)
+	authService := service.NuevoAuthService(usuFake)
 
 	// servidores con nil para los servicios de las demás entidades (solo para los que se están usando)
-	srv := handlers.NewServer(invService, nil, nil, nil, nil, nil, nil, nil, nil, authService)
+	srv := handlers.NewServer(handlers.Deps{Inventario: invService, Auth: authService})
 
 	// router completo con middleware real
 	r := chi.NewRouter()

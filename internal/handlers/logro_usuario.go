@@ -3,9 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"proyecto-semestral/internal/models"
 )
@@ -18,7 +15,7 @@ func (s *Server) ListarLogro_Usuario(w http.ResponseWriter, _ *http.Request) {
 
 // ObtenerLogro_Usuario atiende GET /api/v1/logro_usuarios/{id}.
 func (s *Server) ObtenerLogro_Usuario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -50,7 +47,7 @@ func (s *Server) CrearLogro_Usuario(w http.ResponseWriter, r *http.Request) {
 
 // ActualizarLogro_Usuario atiende PUT /api/v1/logro_usuarios/{id}.
 func (s *Server) ActualizarLogro_Usuario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -73,7 +70,7 @@ func (s *Server) ActualizarLogro_Usuario(w http.ResponseWriter, r *http.Request)
 
 // BorrarLogro_Usuario atiende DELETE /api/v1/logro_usuarios/{id}.
 func (s *Server) BorrarLogro_Usuario(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return

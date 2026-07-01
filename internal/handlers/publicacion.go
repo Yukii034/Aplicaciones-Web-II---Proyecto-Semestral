@@ -3,10 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 
 	"proyecto-semestral/internal/models"
 )
@@ -19,7 +16,7 @@ func (s *Server) ListarPublicacion(w http.ResponseWriter, _ *http.Request) {
 
 // ObtenerPublicacion atiende GET /api/v1/publicaciones/{id}.
 func (s *Server) ObtenerPublicacion(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -56,7 +53,7 @@ func (s *Server) CrearPublicacion(w http.ResponseWriter, r *http.Request) {
 
 // ActualizarPublicacion atiende PUT /api/v1/publicaciones/{id}.
 func (s *Server) ActualizarPublicacion(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
@@ -83,7 +80,7 @@ func (s *Server) ActualizarPublicacion(w http.ResponseWriter, r *http.Request) {
 
 // BorrarPublicacion atiende DELETE /api/v1/publicaciones/{id}.
 func (s *Server) BorrarPublicacion(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := idDeURL(r)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, "El ID debe ser un número entero")
 		return
