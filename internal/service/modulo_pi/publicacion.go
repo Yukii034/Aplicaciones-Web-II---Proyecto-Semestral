@@ -7,11 +7,12 @@ import (
 )
 
 type PublicacionService struct {
-	repo storage.PublicacionRepository
+	repo       storage.PublicacionRepository
+	inventario storage.InventarioRepository // para las relaciones
 }
 
-func NewPublicacionService(repo storage.PublicacionRepository) *PublicacionService {
-	return &PublicacionService{repo: repo}
+func NewPublicacionService(repo storage.PublicacionRepository, inv storage.InventarioRepository) *PublicacionService {
+	return &PublicacionService{repo: repo, inventario: inv}
 }
 
 func (s *PublicacionService) ListarPublicacion() []models.Publicacion {
@@ -31,6 +32,11 @@ func (s *PublicacionService) CrearPublicacion(p models.Publicacion) (models.Publ
 		return models.Publicacion{}, err
 	}
 
+	// verifica que el inventario referenciado exista
+	if _, ok := s.inventario.BuscarInventarioPorID(p.InventarioID); !ok {
+		return models.Publicacion{}, se.ErrNoEncontrado
+	}
+
 	return s.repo.CrearPublicacion(p), nil
 }
 
@@ -39,11 +45,15 @@ func (s *PublicacionService) ActualizarPublicacion(id int, p models.Publicacion)
 		return models.Publicacion{}, err
 	}
 
+	// verifica que el inventario referenciado exista
+	if _, ok := s.inventario.BuscarInventarioPorID(p.InventarioID); !ok {
+		return models.Publicacion{}, se.ErrNoEncontrado
+	}
+
 	c, ok := s.repo.ActualizarPublicacion(id, p)
 	if !ok {
 		return models.Publicacion{}, se.ErrNoEncontrado
 	}
-
 	return c, nil
 }
 

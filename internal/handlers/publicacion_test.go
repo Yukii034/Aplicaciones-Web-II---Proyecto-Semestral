@@ -72,10 +72,12 @@ func construirEntornoP(t *testing.T) (http.Handler, string) {
 	pubFake := &publicacionFake{nextID: 1}
 	usuFake := nuevoUsuarioFake() // viene de inventario_test.go
 
-	pubService := pi.NewPublicacionService(pubFake)
+	invFake := nuevoInventarioFake() // para la relacion
+	pubService := pi.NewPublicacionService(pubFake, invFake)
 	authService := service.NuevoAuthService(usuFake)
 
 	srv := handlers.NewServer(handlers.Deps{
+		Inventario:  pi.NewInventarioService(invFake), // para la relacion
 		Publicacion: pubService,
 		Auth:        authService,
 	})
@@ -87,6 +89,7 @@ func construirEntornoP(t *testing.T) (http.Handler, string) {
 
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.Auth(authService))
+			r.Post("/inventario", srv.CrearInventario) // para la relacion
 			r.Get("/publicaciones", srv.ListarPublicacion)
 			r.Post("/publicaciones", srv.CrearPublicacion)
 			r.Get("/publicaciones/{id}", srv.ObtenerPublicacion)
@@ -102,8 +105,15 @@ func construirEntornoP(t *testing.T) (http.Handler, string) {
 // TestCrearPublicacion_Exitoso: POST con token y cuerpo valido -> 201 Creado
 func TestCrearPublicacion_Exitoso(t *testing.T) {
 	h, token := construirEntornoP(t)
-	body := `{"titulo":"Cambio laptop por tablet","tipo_oferta":"intercambio","estado_publicacion":"disponible","inventario_id":1}`
 
+	// primero crea el inventario para que la validacion pase
+	bodyInv := `{"nombre":"Laptop Dell","categoria":"Tecnología","cantidad":1}`
+	reqInv := httptest.NewRequest(http.MethodPost, "/api/v1/inventario", strings.NewReader(bodyInv))
+	reqInv.Header.Set("Authorization", "Bearer "+token)
+	h.ServeHTTP(httptest.NewRecorder(), reqInv)
+
+	// ahora crea la publicacion con inventario_id: 1
+	body := `{"titulo":"Cambio laptop por tablet","tipo_oferta":"intercambio","estado_publicacion":"disponible","inventario_id":1}`
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/publicaciones", strings.NewReader(body))
 	req.Header.Set("Authorization", "Bearer "+token)
 	rec := httptest.NewRecorder()

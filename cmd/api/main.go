@@ -1,4 +1,3 @@
-// Docker .yaml dockerfile
 package main
 
 import (
@@ -43,7 +42,7 @@ func run(cfg config.Config) error {
 	// 2. Capa de servicio.
 	authService := service.NuevoAuthService(recursos.Usuarios)
 	invService := pi.NewInventarioService(recursos.Almacen)
-	pubService := pi.NewPublicacionService(recursos.Almacen)
+	pubService := pi.NewPublicacionService(recursos.Almacen, recursos.Almacen)
 	repService := rlc.NewReputacionService(recursos.Almacen)
 	luService := rlc.NewLogro_UsuarioService(recursos.Almacen)
 	lService := rlc.NewLogroService(recursos.Almacen)
