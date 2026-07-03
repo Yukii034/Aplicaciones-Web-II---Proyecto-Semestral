@@ -55,6 +55,7 @@ func run(cfg config.Config) error {
 	authMW := middleware.Auth(authService)
 
 	servidor := handlers.NewServer(handlers.Deps{
+		Almacen:       recursos.Almacen,
 		Inventario:    invService,
 		Publicacion:   pubService,
 		Reputacion:    repService,
@@ -77,6 +78,7 @@ func run(cfg config.Config) error {
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Post("/auth/register", servidor.Registrar)
 		r.Post("/auth/login", servidor.Login)
+		r.Post("/seed", servidor.Sembrar)
 
 		r.Group(func(r chi.Router) {
 			r.Use(authMW)
