@@ -70,3 +70,42 @@ func TestAlmacen_BuscarInexistente(t *testing.T) {
 	// Assert - verifica que haya retornado un false ya que no existe
 	assert.False(t, ok, "debe retornar false para un ID inexistente")
 }
+
+func TestAlmacen_ActualizarInventario(t *testing.T) {
+	almacen := nuevoDBMemoria(t)
+
+	creado := almacen.CrearInventario(models.Inventario{
+		Nombre:   "Laptop Dell",
+		Cantidad: 1,
+	})
+
+	actualizado, ok := almacen.ActualizarInventario(creado.ID, models.Inventario{
+		Nombre:   "Laptop Dell actualizada",
+		Cantidad: 2,
+	})
+
+	require.True(t, ok)
+	assert.Equal(t, "Laptop Dell actualizada", actualizado.Nombre)
+}
+
+func TestAlmacen_BorrarInventario(t *testing.T) {
+	almacen := nuevoDBMemoria(t)
+
+	creado := almacen.CrearInventario(models.Inventario{
+		Nombre:   "Silla",
+		Cantidad: 1,
+	})
+
+	ok := almacen.BorrarInventario(creado.ID)
+	require.True(t, ok)
+
+	_, encontrado := almacen.BuscarInventarioPorID(creado.ID)
+	assert.False(t, encontrado)
+}
+
+func TestAlmacen_BorrarInventario_NoExiste(t *testing.T) {
+	almacen := nuevoDBMemoria(t)
+
+	ok := almacen.BorrarInventario(999)
+	assert.False(t, ok)
+}

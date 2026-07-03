@@ -89,6 +89,9 @@ func construirEntornoP(t *testing.T) (http.Handler, string) {
 			r.Use(middleware.Auth(authService))
 			r.Get("/publicaciones", srv.ListarPublicacion)
 			r.Post("/publicaciones", srv.CrearPublicacion)
+			r.Get("/publicaciones/{id}", srv.ObtenerPublicacion)
+			r.Put("/publicaciones/{id}", srv.ActualizarPublicacion)
+			r.Delete("/publicaciones/{id}", srv.BorrarPublicacion)
 		})
 	})
 
@@ -118,4 +121,50 @@ func TestRutaProtegida_SinTokenP(t *testing.T) {
 	h.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
+func TestObtenerPublicacion_NoExiste(t *testing.T) {
+	h, token := construirEntornoP(t)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/publicaciones/999", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestCrearPublicacion_TituloVacio(t *testing.T) {
+	h, token := construirEntornoP(t)
+	body := `{"titulo":"","tipo_oferta":"intercambio"}`
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/publicaciones", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
+
+func TestBorrarPublicacion_NoExiste(t *testing.T) {
+	h, token := construirEntornoP(t)
+
+	req := httptest.NewRequest(http.MethodDelete, "/api/v1/publicaciones/999", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestActualizarPublicacion_NoExiste(t *testing.T) {
+	h, token := construirEntornoP(t)
+	body := `{"titulo":"Cambio tablet","tipo_oferta":"intercambio"}`
+
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/publicaciones/999", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
 }

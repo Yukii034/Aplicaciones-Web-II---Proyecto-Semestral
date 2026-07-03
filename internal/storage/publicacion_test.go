@@ -52,3 +52,42 @@ func TestAlmacen_BuscarInexistenteP(t *testing.T) {
 	// Assert - verifica que haya retornado un false ya que no existe
 	assert.False(t, ok, "debe retornar false para un ID inexistente")
 }
+
+func TestAlmacen_ActualizarPublicacion(t *testing.T) {
+	almacen := nuevoDBMemoria(t)
+
+	creado := almacen.CrearPublicacion(models.Publicacion{
+		Titulo:     "Cambio laptop",
+		TipoOferta: "intercambio",
+	})
+
+	actualizado, ok := almacen.ActualizarPublicacion(creado.ID, models.Publicacion{
+		Titulo:     "Cambio laptop actualizado",
+		TipoOferta: "donacion",
+	})
+
+	require.True(t, ok)
+	assert.Equal(t, "Cambio laptop actualizado", actualizado.Titulo)
+}
+
+func TestAlmacen_BorrarPublicacion(t *testing.T) {
+	almacen := nuevoDBMemoria(t)
+
+	creado := almacen.CrearPublicacion(models.Publicacion{
+		Titulo:     "Dono microondas",
+		TipoOferta: "donacion",
+	})
+
+	ok := almacen.BorrarPublicacion(creado.ID)
+	require.True(t, ok)
+
+	_, encontrado := almacen.BuscarPublicacionPorID(creado.ID)
+	assert.False(t, encontrado)
+}
+
+func TestAlmacen_BorrarPublicacion_NoExiste(t *testing.T) {
+	almacen := nuevoDBMemoria(t)
+
+	ok := almacen.BorrarPublicacion(999)
+	assert.False(t, ok)
+}

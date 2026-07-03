@@ -133,3 +133,64 @@ func TestInventarioService_Borrar_NoEncontrado(t *testing.T) {
 	require.ErrorIs(t, err, service.ErrNoEncontrado)
 	repo.AssertExpectations(t)
 }
+
+func TestInventarioService_Actualizar_NoEncontrado(t *testing.T) {
+	repo := new(inventarioRepoMock)
+	repo.On("ActualizarInventario", 999, models.Inventario{Nombre: "Laptop", Cantidad: 1}).Return(models.Inventario{}, false)
+	svc := pi.NewInventarioService(repo)
+
+	_, err := svc.ActualizarInventario(999, models.Inventario{Nombre: "Laptop", Cantidad: 1})
+
+	require.ErrorIs(t, err, service.ErrNoEncontrado)
+	repo.AssertExpectations(t)
+}
+
+func TestInventarioService_Actualizar_NombreVacio(t *testing.T) {
+	repo := new(inventarioRepoMock)
+	svc := pi.NewInventarioService(repo)
+
+	_, err := svc.ActualizarInventario(1, models.Inventario{Nombre: ""})
+
+	require.ErrorIs(t, err, service.ErrVacio)
+	repo.AssertNotCalled(t, "ActualizarInventario")
+}
+
+func TestInventarioService_Listar(t *testing.T) {
+	repo := new(inventarioRepoMock)
+	esperado := []models.Inventario{
+		{ID: 1, Nombre: "Laptop Dell", Cantidad: 1},
+		{ID: 2, Nombre: "Silla", Cantidad: 2},
+	}
+	repo.On("ListarInventario").Return(esperado)
+	svc := pi.NewInventarioService(repo)
+
+	lista := svc.ListarInventario()
+
+	assert.Len(t, lista, 2)
+	assert.Equal(t, "Laptop Dell", lista[0].Nombre)
+	repo.AssertExpectations(t)
+}
+
+func TestInventarioService_Obtener_Exitoso(t *testing.T) {
+	repo := new(inventarioRepoMock)
+	esperado := models.Inventario{ID: 1, Nombre: "Laptop Dell", Cantidad: 1}
+	repo.On("BuscarInventarioPorID", 1).Return(esperado, true)
+	svc := pi.NewInventarioService(repo)
+
+	encontrado, err := svc.BuscarInventario(1)
+
+	require.NoError(t, err)
+	assert.Equal(t, "Laptop Dell", encontrado.Nombre)
+	repo.AssertExpectations(t)
+}
+
+func TestInventarioService_Borrar_Exitoso(t *testing.T) {
+	repo := new(inventarioRepoMock)
+	repo.On("BorrarInventario", 1).Return(true)
+	svc := pi.NewInventarioService(repo)
+
+	err := svc.BorrarInventario(1)
+
+	require.NoError(t, err)
+	repo.AssertExpectations(t)
+}

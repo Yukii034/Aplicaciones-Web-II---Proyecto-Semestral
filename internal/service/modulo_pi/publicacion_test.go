@@ -112,3 +112,64 @@ func TestPublicacionService_Borrar_NoEncontrado(t *testing.T) {
 	require.ErrorIs(t, err, service.ErrNoEncontrado)
 	repo.AssertExpectations(t)
 }
+
+func TestPublicacionService_Actualizar_NoEncontrado(t *testing.T) {
+	repo := new(publicacionRepoMock)
+	repo.On("ActualizarPublicacion", 999, models.Publicacion{Titulo: "Cambio laptop", TipoOferta: "intercambio"}).Return(models.Publicacion{}, false)
+	svc := pi.NewPublicacionService(repo)
+
+	_, err := svc.ActualizarPublicacion(999, models.Publicacion{Titulo: "Cambio laptop", TipoOferta: "intercambio"})
+
+	require.ErrorIs(t, err, service.ErrNoEncontrado)
+	repo.AssertExpectations(t)
+}
+
+func TestPublicacionService_Actualizar_TituloVacio(t *testing.T) {
+	repo := new(publicacionRepoMock)
+	svc := pi.NewPublicacionService(repo)
+
+	_, err := svc.ActualizarPublicacion(1, models.Publicacion{Titulo: ""})
+
+	require.ErrorIs(t, err, service.ErrVacio)
+	repo.AssertNotCalled(t, "ActualizarPublicacion")
+}
+
+func TestPublicacionService_Listar(t *testing.T) {
+	repo := new(publicacionRepoMock)
+	esperado := []models.Publicacion{
+		{ID: 1, Titulo: "Cambio laptop", TipoOferta: "intercambio"},
+		{ID: 2, Titulo: "Dono microondas", TipoOferta: "donacion"},
+	}
+	repo.On("ListarPublicacion").Return(esperado)
+	svc := pi.NewPublicacionService(repo)
+
+	lista := svc.ListarPublicacion()
+
+	assert.Len(t, lista, 2)
+	assert.Equal(t, "Cambio laptop", lista[0].Titulo)
+	repo.AssertExpectations(t)
+}
+
+func TestPublicacionService_Obtener_Exitoso(t *testing.T) {
+	repo := new(publicacionRepoMock)
+	esperado := models.Publicacion{ID: 1, Titulo: "Cambio laptop", TipoOferta: "intercambio"}
+	repo.On("BuscarPublicacionPorID", 1).Return(esperado, true)
+	svc := pi.NewPublicacionService(repo)
+
+	encontrada, err := svc.BuscarPublicacion(1)
+
+	require.NoError(t, err)
+	assert.Equal(t, "Cambio laptop", encontrada.Titulo)
+	repo.AssertExpectations(t)
+}
+
+func TestPublicacionService_Borrar_Exitoso(t *testing.T) {
+	repo := new(publicacionRepoMock)
+	repo.On("BorrarPublicacion", 1).Return(true)
+	svc := pi.NewPublicacionService(repo)
+
+	err := svc.BorrarPublicacion(1)
+
+	require.NoError(t, err)
+	repo.AssertExpectations(t)
+}

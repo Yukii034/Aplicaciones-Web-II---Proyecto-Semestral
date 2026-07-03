@@ -133,6 +133,9 @@ func construirEntorno(t *testing.T) (http.Handler, string) {
 			r.Use(middleware.Auth(authService))
 			r.Get("/inventario", srv.ListarInventario)
 			r.Post("/inventario", srv.CrearInventario)
+			r.Get("/inventario/{id}", srv.ObtenerInventario)
+			r.Put("/inventario/{id}", srv.ActualizarInventario)
+			r.Delete("/inventario/{id}", srv.BorrarInventario)
 		})
 	})
 
@@ -188,4 +191,27 @@ func TestRutaProtegida_SinToken(t *testing.T) {
 	h.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusUnauthorized, rec.Code) // se espera que salga el codigo 401 sin autorizar, ya que no tiene token
+}
+
+func TestObtenerInventario_NoExiste(t *testing.T) {
+	h, token := construirEntorno(t)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/inventario/999", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestCrearInventario_TituloVacio(t *testing.T) {
+	h, token := construirEntorno(t)
+	body := `{"nombre":"","categoria":"Tecnología","cantidad":1}`
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/inventario", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
