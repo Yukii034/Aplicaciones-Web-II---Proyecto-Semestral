@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: proyecto
+      POSTGRES_PASSWORD: proyecto
+      POSTGRES_DB: proyecto
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U proyecto -d proyecto"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  api:
+    build: .
+    environment:
+      PUERTO: ":8080"
+      DB_DRIVER: postgres
+      DB_DSN: "host=db user=proyecto password=proyecto dbname=proyecto port=5432 sslmode=disable TimeZone=America/Guayaquil"
+      JWT_SECRETO: "cambia-esto-en-produccion"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  dbdata:

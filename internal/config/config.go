@@ -18,6 +18,8 @@ import (
 // fuente de verdad.
 type Config struct {
 	Puerto       string        // puerto HTTP, ej ":8080"
+	DBDriver     string        // "sqlite" (default) o "postgres"
+	DBDsn        string        // DSN para postgres, ej "host=... user=... dbname=..."
 	RutaDB       string        // archivo SQLite: proyecto.db"
 	Backend      string        // backend de productos/categorias: "gorm" (default) o "sqlc"
 	JWTSecreto   []byte        // clave para firmar/verificar JWT
@@ -36,6 +38,8 @@ func Cargar() Config {
 
 	return Config{
 		Puerto:       conTexto("PUERTO", ":8080"),
+		DBDriver:     conTexto("DB_DRIVER", "sqlite"),
+		DBDsn:        conTexto("DB_DSN", ""),
 		RutaDB:       conTexto("RUTA_DB", "proyecto.db"),
 		Backend:      conTexto("STORAGE", "gorm"),
 		JWTSecreto:   []byte(conTexto("JWT_SECRETO", "Contraseña_Larga_Y_Segura_123")),

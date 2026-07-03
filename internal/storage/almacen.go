@@ -86,3 +86,15 @@ type Acuerdo_ItemRepository interface {
 	ActualizarAcuerdoItem(id int, datos models.AcuerdoItem) (models.AcuerdoItem, bool)
 	BorrarAcuerdoItem(id int) bool
 }
+
+type Almacen interface {
+	InventarioRepository
+	PublicacionRepository
+	UserRepository
+	ReputacionRepository
+	Logro_UsuarioRepository
+	LogroRepository
+	CalificacionRepository
+	AcuerdoRepository
+	Acuerdo_ItemRepository
+}

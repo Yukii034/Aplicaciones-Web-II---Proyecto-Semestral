@@ -1,63 +1,58 @@
+// Docker .yaml dockerfile
 package main
 
 import (
+	"context"
+	"errors"
 	"log"
+	"net/http"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/glebarez/sqlite"
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
-	"gorm.io/gorm"
 
 	"proyecto-semestral/internal/config"
 	"proyecto-semestral/internal/handlers"
 	"proyecto-semestral/internal/httpserver"
 	"proyecto-semestral/internal/middleware"
-	"proyecto-semestral/internal/models"
 	"proyecto-semestral/internal/service"
 	aiu "proyecto-semestral/internal/service/modulo_aiu"
-	pi "proyecto-semestral/internal/service/modulo_pi" // agg la carpeta de cada servicio de cada modulo
+	pi "proyecto-semestral/internal/service/modulo_pi"
 	rlc "proyecto-semestral/internal/service/modulo_rlc"
 	"proyecto-semestral/internal/storage"
 )
 
 func main() {
-	// 1. Abrir SQLite y migrar
 	cfg := config.Cargar()
-	db, err := gorm.Open(sqlite.Open(cfg.RutaDB), &gorm.Config{})
+	if err := run(cfg); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run(cfg config.Config) error {
+	// 1. Recursos de almacenamiento: abre DB (sqlite local o postgres en Docker), migra.
+	recursos, err := storage.Inicializar(cfg.DBDriver, cfg.DBDsn, cfg.RutaDB)
 	if err != nil {
-		log.Fatal("no se pudo abrir la base de datos: ", err)
+		return err
 	}
-	if err := db.AutoMigrate(
-		&models.Inventario{},
-		&models.Publicacion{},
-		&models.Reputacion{},
-		&models.Logro_Usuario{},
-		&models.Logro{},
-		&models.Calificacion{},
-		&models.Usuario{},
-		&models.Acuerdo{},
-		&models.AcuerdoItem{},
-	); err != nil {
-		log.Fatal("falló AutoMigrate: ", err)
-	}
+	defer func() { _ = recursos.Cerrar() }()
+	log.Printf("Motor de base de datos: %s | Backend: %s", cfg.DBDriver, recursos.BackendUsado)
 
-	// 2. Crear almacén y sembrar datos de ejemplo
-	almacen := storage.NuevoAlmacenSQLite(db) // conexion a la db
+	// 2. Capa de servicio.
+	authService := service.NuevoAuthService(recursos.Usuarios)
+	invService := pi.NewInventarioService(recursos.Almacen)
+	pubService := pi.NewPublicacionService(recursos.Almacen)
+	repService := rlc.NewReputacionService(recursos.Almacen)
+	luService := rlc.NewLogro_UsuarioService(recursos.Almacen)
+	lService := rlc.NewLogroService(recursos.Almacen)
+	caService := rlc.NewCalificacionService(recursos.Almacen)
+	acIService := aiu.NewAcuerdoService(recursos.Almacen)
+	acService := aiu.NewAcuerdoItemService(recursos.Almacen)
+	userService := aiu.NewUsuarioService(recursos.Almacen)
 
-	authService := service.NuevoAuthService(almacen)  // login y tokens
-	invService := pi.NewInventarioService(almacen)    // logica de inventario
-	pubService := pi.NewPublicacionService(almacen)   // logica de publicacion
-	repService := rlc.NewReputacionService(almacen)   // logica de reputacion
-	luService := rlc.NewLogro_UsuarioService(almacen) //logica de logro_usuario
-	lService := rlc.NewLogroService(almacen)          //logica de logro
-	caService := rlc.NewCalificacionService(almacen)
-	acIService := aiu.NewAcuerdoService(almacen)
-	acService := aiu.NewAcuerdoItemService(almacen)
-	userService := aiu.NewUsuarioService(almacen)
-	// agg de las demás entidades
-
-	// agrega el middleware de auth
-	authMW := middleware.Auth(authService) // proteccion de rutas
+	authMW := middleware.Auth(authService)
 
 	servidor := handlers.NewServer(handlers.Deps{
 		Inventario:    invService,
@@ -72,20 +67,20 @@ func main() {
 		Auth:          authService,
 	})
 
-	// 4. Router
+	// 3. Router + middleware global.
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
 	r.Use(middleware.CORS)
 
-	// 5. Rutas
+	// 4. Rutas.
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Post("/auth/register", servidor.Registrar)
 		r.Post("/auth/login", servidor.Login)
 
 		r.Group(func(r chi.Router) {
 			r.Use(authMW)
-			// Módulo de Publicaciones e Inventario
+
 			r.Get("/inventario", servidor.ListarInventario)
 			r.Post("/inventario", servidor.CrearInventario)
 			r.Get("/inventario/{id}", servidor.ObtenerInventario)
@@ -98,7 +93,6 @@ func main() {
 			r.Put("/publicaciones/{id}", servidor.ActualizarPublicacion)
 			r.Delete("/publicaciones/{id}", servidor.BorrarPublicacion)
 
-			// Módulo de Reputación y Logros
 			r.Get("/reputaciones", servidor.ListarReputacion)
 			r.Post("/reputaciones", servidor.CrearReputacion)
 			r.Get("/reputaciones/{id}", servidor.ObtenerReputacion)
@@ -123,7 +117,6 @@ func main() {
 			r.Put("/calificaciones/{id}", servidor.ActualizarCalificacion)
 			r.Delete("/calificaciones/{id}", servidor.BorrarCalificacion)
 
-			// Módulo de Acuerdos y Transacciones
 			r.Get("/usuarios", servidor.ListarUsuarios)
 			r.Post("/usuarios", servidor.CrearUsuario)
 			r.Get("/usuarios/{id}", servidor.ObtenerUsuario)
@@ -144,7 +137,37 @@ func main() {
 		})
 	})
 
-	srv := httpserver.Nuevo(r)
-	log.Println("Servidor escuchando en http://localhost:8080")
-	log.Fatal(srv.ListenAndServe())
+	// 5. Servidor HTTP con graceful shutdown.
+	srv := httpserver.Nuevo(
+		r,
+		httpserver.ConPuerto(cfg.Puerto),
+		httpserver.ConReadTimeout(cfg.ReadTimeout),
+		httpserver.ConWriteTimeout(cfg.WriteTimeout),
+	)
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	errServidor := make(chan error, 1)
+	go func() {
+		log.Println("Servidor escuchando en http://localhost:8080")
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			errServidor <- err
+		}
+	}()
+
+	select {
+	case err := <-errServidor:
+		return err
+	case <-ctx.Done():
+		log.Println("Senal de apagado recibida, cerrando ordenadamente...")
+	}
+
+	ctxApagado, cancelar := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancelar()
+	if err := srv.Shutdown(ctxApagado); err != nil {
+		return err
+	}
+	log.Println("Servidor detenido limpiamente.")
+	return nil
 }
