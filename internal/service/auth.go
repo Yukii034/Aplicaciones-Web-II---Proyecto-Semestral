@@ -21,7 +21,8 @@ const (
 
 // Claims es el contenido del JWT: el ID del usuario + los campos estandar (exp, iat).
 type Claims struct {
-	UsuarioID int `json:"uid"`
+	UsuarioID int    `json:"uid"`
+	Tipo      string `json:"tipo"` // para otros roles
 	jwt.RegisteredClaims
 }
 
@@ -77,7 +78,7 @@ func NuevoAuthService(repo storage.UserRepository, opts ...AuthOption) *AuthServ
 }
 
 // Registrar crea un usuario nuevo con la contrasena hasheada (bcrypt).
-func (s *AuthService) Registrar(email, password string) (models.Usuario, error) {
+func (s *AuthService) Registrar(email, password, tipo string) (models.Usuario, error) {
 	email = strings.TrimSpace(strings.ToLower(email))
 	if email == "" || strings.TrimSpace(password) == "" {
 		return models.Usuario{}, ErrCredencialesInvalidas
@@ -94,6 +95,7 @@ func (s *AuthService) Registrar(email, password string) (models.Usuario, error) 
 	return s.repo.CrearUsuario(models.Usuario{
 		Email:        email,
 		PasswordHash: string(hash),
+		Tipo:         tipo, // para roles
 	}), nil
 }
 
@@ -115,8 +117,9 @@ func (s *AuthService) Login(email, password string) (string, error) {
 // generarToken arma y firma el JWT con el ID del usuario y la expiracion.
 // Usa el secreto y la duracion del servicio (inyectables por Options).
 func (s *AuthService) generarToken(u models.Usuario) (string, error) {
-	claims := Claims{
+	claims := &Claims{
 		UsuarioID: u.ID,
+		Tipo:      u.Tipo, // para roles
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.duracion)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -128,7 +131,7 @@ func (s *AuthService) generarToken(u models.Usuario) (string, error) {
 
 // ValidarToken verifica firma y expiracion, y devuelve el ID del usuario.
 // Lo usa el middleware de autenticacion: el JWT vive aqui, no en el middleware.
-func (s *AuthService) ValidarToken(tokenStr string) (int, error) {
+func (s *AuthService) ValidarToken(tokenStr string) (int, string, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrCredencialesInvalidas
@@ -136,11 +139,11 @@ func (s *AuthService) ValidarToken(tokenStr string) (int, error) {
 		return s.secreto, nil
 	})
 	if err != nil || !token.Valid {
-		return 0, ErrCredencialesInvalidas
+		return 0, "", ErrCredencialesInvalidas
 	}
 	claims, ok := token.Claims.(*Claims)
 	if !ok {
-		return 0, ErrCredencialesInvalidas
+		return 0, "", ErrCredencialesInvalidas
 	}
-	return claims.UsuarioID, nil
+	return claims.UsuarioID, claims.Tipo, nil
 }

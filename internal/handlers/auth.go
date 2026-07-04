@@ -8,6 +8,7 @@ import (
 type credenciales struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Tipo     string `json:"tipo"` // para roles
 }
 
 func (s *Server) Registrar(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +17,7 @@ func (s *Server) Registrar(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
 		return
 	}
-	usuario, err := s.Auth.Registrar(creds.Email, creds.Password)
+	usuario, err := s.Auth.Registrar(creds.Email, creds.Password, creds.Tipo)
 	if err != nil {
 		RespondError(w, http.StatusBadRequest, err.Error())
 		return

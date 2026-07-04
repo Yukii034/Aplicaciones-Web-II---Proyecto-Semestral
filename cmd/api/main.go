@@ -77,16 +77,20 @@ func run(cfg config.Config) error {
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Post("/auth/register", servidor.Registrar)
 		r.Post("/auth/login", servidor.Login)
-		r.Post("/seed", servidor.Sembrar)
+		r.Post("/seed", servidor.Sembrar) // para sembrar datos si está vacío
 
 		r.Group(func(r chi.Router) {
-			r.Use(authMW)
+			r.Use(authMW) // autenticacion para usuario registrado
 
 			r.Get("/inventario", servidor.ListarInventario)
 			r.Post("/inventario", servidor.CrearInventario)
 			r.Get("/inventario/{id}", servidor.ObtenerInventario)
-			r.Put("/inventario/{id}", servidor.ActualizarInventario)
-			r.Delete("/inventario/{id}", servidor.BorrarInventario)
+
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.SoloAdmin) // acceso solo para admin, agg grupos a los que tengan que ver con sus entidades
+				r.Put("/inventario/{id}", servidor.ActualizarInventario)
+				r.Delete("/inventario/{id}", servidor.BorrarInventario)
+			})
 
 			r.Get("/publicaciones", servidor.ListarPublicacion)
 			r.Post("/publicaciones", servidor.CrearPublicacion)
