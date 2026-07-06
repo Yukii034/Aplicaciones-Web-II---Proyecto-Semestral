@@ -86,7 +86,7 @@ func run(cfg config.Config) error {
 			r.Post("/inventario", servidor.CrearInventario)
 			r.Get("/inventario/{id}", servidor.ObtenerInventario)
 
-			r.Group(func(r chi.Router) {
+			r.Group(func(r chi.Router) 
 				r.Use(middleware.SoloAdmin) // acceso solo para admin, agg grupos a los que tengan que ver con sus entidades
 				r.Put("/inventario/{id}", servidor.ActualizarInventario)
 				r.Delete("/inventario/{id}", servidor.BorrarInventario)

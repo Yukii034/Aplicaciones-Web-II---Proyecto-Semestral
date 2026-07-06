@@ -26,7 +26,7 @@ func nuevoDBMemoria(t *testing.T) *storage.AlmacenSQLite {
 	require.NoError(t, err)
 
 	return storage.NuevoAlmacenSQLite(db)
-}
+
 
 func TestAlmacen_CrearYBuscarInventario(t *testing.T) {
 	// Arrange - migra el modelo de inventario a una memoria aparte
