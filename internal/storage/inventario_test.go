@@ -21,6 +21,7 @@ func nuevoDBMemoria(t *testing.T) *storage.AlmacenSQLite {
 		&models.Publicacion{},
 		&models.Logro{},
 		&models.Usuario{},
+		&models.Reputacion{},
 	)
 	require.NoError(t, err)
 

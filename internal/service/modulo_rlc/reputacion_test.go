@@ -113,3 +113,64 @@ func TestReputacionService_Borrar_NoEncontrado(t *testing.T) {
 	require.ErrorIs(t, err, service.ErrNoEncontrado)
 	repo.AssertExpectations(t)
 }
+
+func TestReputacionService_Actualizar_NoEncontrado(t *testing.T) {
+	repo := new(reputacionRepoMock)
+	repo.On("ActualizarReputacion", 999, models.Reputacion{PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5}).Return(models.Reputacion{}, false)
+	svc := rlc.NewReputacionService(repo)
+
+	_, err := svc.ActualizarReputacion(999, models.Reputacion{PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5})
+
+	require.ErrorIs(t, err, service.ErrNoEncontrado)
+	repo.AssertExpectations(t)
+}
+
+func TestReputacionService_Actualizar_Puntos_TotalesVacio(t *testing.T) {
+	repo := new(reputacionRepoMock)
+	svc := rlc.NewReputacionService(repo)
+
+	_, err := svc.ActualizarReputacion(1, models.Reputacion{PuntosTotales: 0})
+
+	require.ErrorIs(t, err, service.ErrVacio)
+	repo.AssertNotCalled(t, "ActualizarReputacion")
+}
+
+func TestReputacionService_Listar(t *testing.T) {
+	repo := new(reputacionRepoMock)
+	esperado := []models.Reputacion{
+		{ID: 1, PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5},
+		{ID: 2, PuntosTotales: 200, Nivel: 3, AcuerdosCompl: 7, CalificacionPromedio: 4.7},
+	}
+	repo.On("ListarReputacion").Return(esperado)
+	svc := rlc.NewReputacionService(repo)
+
+	lista := svc.ListarReputacion()
+
+	assert.Len(t, lista, 2)
+	assert.Equal(t, 150, lista[0].PuntosTotales)
+	repo.AssertExpectations(t)
+}
+
+func TestReputacionService_Obtener_Exitoso(t *testing.T) {
+	repo := new(reputacionRepoMock)
+	esperado := models.Reputacion{ID: 1, PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5}
+	repo.On("BuscarReputacionPorID", 1).Return(esperado, true)
+	svc := rlc.NewReputacionService(repo)
+
+	encontrado, err := svc.BuscarReputacion(1)
+
+	require.NoError(t, err)
+	assert.Equal(t, 150, encontrado.PuntosTotales)
+	repo.AssertExpectations(t)
+}
+
+func TestReputacionService_Borrar_Exitoso(t *testing.T) {
+	repo := new(reputacionRepoMock)
+	repo.On("BorrarReputacion", 1).Return(true)
+	svc := rlc.NewReputacionService(repo)
+
+	err := svc.BorrarReputacion(1)
+
+	require.NoError(t, err)
+	repo.AssertExpectations(t)
+}

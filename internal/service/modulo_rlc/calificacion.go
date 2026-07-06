@@ -7,7 +7,8 @@ import (
 )
 
 type CalificacionService struct {
-	repo storage.CalificacionRepository
+	repo    storage.CalificacionRepository
+	usuario storage.UserRepository
 }
 
 func NewCalificacionService(repo storage.CalificacionRepository) *CalificacionService {
@@ -59,6 +60,8 @@ func validarCalificacion(c models.Calificacion) error {
 	if c.Comentarios == "" {
 		return se.ErrVacio
 	}
-
+	if c.UsuarioID == 0 {
+		return se.ErrVacio
+	}
 	return nil
 }

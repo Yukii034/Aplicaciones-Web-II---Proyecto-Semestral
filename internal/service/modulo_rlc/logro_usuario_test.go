@@ -114,3 +114,68 @@ func TestLogro_UsuarioService_Borrar_NoEncontrado(t *testing.T) {
 	require.ErrorIs(t, err, service.ErrNoEncontrado)
 	repo.AssertExpectations(t)
 }
+
+func TestLogro_UsuarioService_Actualizar_NoEncontrado(t *testing.T) {
+	repo := new(logro_usuarioRepoMock)
+	fecha := time.Now()
+	datos := models.Logro_Usuario{FechaDesbl: fecha, UsuarioID: 1, LogroID: 1}
+	repo.On("ActualizarLogro_Usuario", 999, datos).Return(models.Logro_Usuario{}, false)
+	svc := rlc.NewLogro_UsuarioService(repo)
+
+	_, err := svc.ActualizarLogro_Usuario(999, datos)
+
+	require.ErrorIs(t, err, service.ErrNoEncontrado)
+	repo.AssertExpectations(t)
+}
+
+func TestLogro_UsuarioService_Actualizar_FechaVacia(t *testing.T) {
+	repo := new(logro_usuarioRepoMock)
+	svc := rlc.NewLogro_UsuarioService(repo)
+
+	_, err := svc.ActualizarLogro_Usuario(1, models.Logro_Usuario{})
+
+	require.ErrorIs(t, err, service.ErrVacio)
+	repo.AssertNotCalled(t, "ActualizarLogro_Usuario")
+}
+
+func TestLogro_UsuarioService_Listar(t *testing.T) {
+	repo := new(logro_usuarioRepoMock)
+	fecha := time.Now()
+	esperado := []models.Logro_Usuario{
+		{ID: 1, FechaDesbl: fecha, UsuarioID: 1, LogroID: 1},
+		{ID: 2, FechaDesbl: fecha, UsuarioID: 2, LogroID: 2},
+	}
+	repo.On("ListarLogro_Usuario").Return(esperado)
+	svc := rlc.NewLogro_UsuarioService(repo)
+
+	lista := svc.ListarLogro_Usuario()
+
+	assert.Len(t, lista, 2)
+	assert.Equal(t, 1, lista[0].UsuarioID)
+	repo.AssertExpectations(t)
+}
+
+func TestLogro_UsuarioService_Obtener_Exitoso(t *testing.T) {
+	repo := new(logro_usuarioRepoMock)
+	fecha := time.Now()
+	esperado := models.Logro_Usuario{ID: 1, FechaDesbl: fecha, UsuarioID: 1, LogroID: 1}
+	repo.On("BuscarLogro_UsuarioPorID", 1).Return(esperado, true)
+	svc := rlc.NewLogro_UsuarioService(repo)
+
+	encontrado, err := svc.BuscarLogro_Usuario(1)
+
+	require.NoError(t, err)
+	assert.Equal(t, 1, encontrado.UsuarioID)
+	repo.AssertExpectations(t)
+}
+
+func TestLogro_UsuarioService_Borrar_Exitoso(t *testing.T) {
+	repo := new(logro_usuarioRepoMock)
+	repo.On("BorrarLogro_Usuario", 1).Return(true)
+	svc := rlc.NewLogro_UsuarioService(repo)
+
+	err := svc.BorrarLogro_Usuario(1)
+
+	require.NoError(t, err)
+	repo.AssertExpectations(t)
+}

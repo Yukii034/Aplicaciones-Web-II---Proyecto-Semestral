@@ -68,20 +68,21 @@ func (f *logroFake) BorrarLogro(id int) bool {
 
 var _ storage.LogroRepository = (*logroFake)(nil)
 
-// construirEntornoLogro arma un router mínimo solo con la entidad Logro.
 func construirEntornoLogro(t *testing.T) http.Handler {
 	t.Helper()
 
 	logFake := nuevoLogroFake()
 	logService := rlc.NewLogroService(logFake)
 
-	// nil para todos los servicios excepto Logro (5ta posición)
 	srv := handlers.NewServer(handlers.Deps{Logro: logService})
 
 	r := chi.NewRouter()
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/logros", srv.ListarLogro)
 		r.Post("/logros", srv.CrearLogro)
+		r.Get("/logros/{id}", srv.ObtenerLogro) // necesaria para TestObtenerLogro_NoExiste
+		r.Put("/logros/{id}", srv.ActualizarLogro)
+		r.Delete("/logros/{id}", srv.BorrarLogro)
 	})
 
 	return r
@@ -117,4 +118,25 @@ func TestListarLogro_Vacio(t *testing.T) {
 	h.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusOK, rec.Code)
+}
+
+func TestObtenerLogro_NoExiste(t *testing.T) {
+	h := construirEntornoLogro(t)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/logros/999", nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestCrearLogro_NombreVacioExplicito(t *testing.T) {
+	h := construirEntornoLogro(t)
+	body := `{"nombre":"","descripcion":"sin nombre","puntos_requeridos":10}`
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/logros", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusBadRequest, rec.Code)
 }

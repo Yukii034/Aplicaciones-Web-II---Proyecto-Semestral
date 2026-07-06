@@ -101,20 +101,30 @@ func run(cfg config.Config) error {
 			r.Get("/reputaciones", servidor.ListarReputacion)
 			r.Post("/reputaciones", servidor.CrearReputacion)
 			r.Get("/reputaciones/{id}", servidor.ObtenerReputacion)
-			r.Put("/reputaciones/{id}", servidor.ActualizarReputacion)
-			r.Delete("/reputaciones/{id}", servidor.BorrarReputacion)
+
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.SoloAdmin)
+				r.Put("/reputaciones/{id}", servidor.ActualizarReputacion)
+				r.Delete("/reputaciones/{id}", servidor.BorrarReputacion)
+			})
 
 			r.Get("/logro_usuarios", servidor.ListarLogro_Usuario)
 			r.Post("/logro_usuarios", servidor.CrearLogro_Usuario)
 			r.Get("/logro_usuarios/{id}", servidor.ObtenerLogro_Usuario)
-			r.Put("/logro_usuarios/{id}", servidor.ActualizarLogro_Usuario)
-			r.Delete("/logro_usuarios/{id}", servidor.BorrarLogro_Usuario)
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.SoloAdmin)
+				r.Put("/logro_usuarios/{id}", servidor.ActualizarLogro_Usuario)
+				r.Delete("/logro_usuarios/{id}", servidor.BorrarLogro_Usuario)
+			})
 
 			r.Get("/logros", servidor.ListarLogro)
 			r.Post("/logros", servidor.CrearLogro)
 			r.Get("/logros/{id}", servidor.ObtenerLogro)
-			r.Put("/logros/{id}", servidor.ActualizarLogro)
-			r.Delete("/logros/{id}", servidor.BorrarLogro)
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.SoloAdmin)
+				r.Put("/logros/{id}", servidor.ActualizarLogro)
+				r.Delete("/logros/{id}", servidor.BorrarLogro)
+			})
 
 			r.Get("/calificaciones", servidor.ListarCalificacion)
 			r.Post("/calificaciones", servidor.CrearCalificacion)

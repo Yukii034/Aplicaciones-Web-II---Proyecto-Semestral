@@ -113,3 +113,64 @@ func TestCalificacionService_Borrar_NoEncontrado(t *testing.T) {
 	require.ErrorIs(t, err, service.ErrNoEncontrado)
 	repo.AssertExpectations(t)
 }
+
+func TestCalificacionService_Actualizar_NoEncontrado(t *testing.T) {
+	repo := new(calificacionRepoMock)
+	repo.On("ActualizarCalificacion", 999, models.Calificacion{Comentarios: "Buen intercambio"}).Return(models.Calificacion{}, false)
+	svc := rlc.NewCalificacionService(repo)
+
+	_, err := svc.ActualizarCalificacion(999, models.Calificacion{Comentarios: "Buen intercambio"})
+
+	require.ErrorIs(t, err, service.ErrNoEncontrado)
+	repo.AssertExpectations(t)
+}
+
+func TestCalificacionService_Actualizar_ComentarioVacio(t *testing.T) {
+	repo := new(calificacionRepoMock)
+	svc := rlc.NewCalificacionService(repo)
+
+	_, err := svc.ActualizarCalificacion(1, models.Calificacion{Comentarios: ""})
+
+	require.ErrorIs(t, err, service.ErrVacio)
+	repo.AssertNotCalled(t, "ActualizarCalificacion")
+}
+
+func TestCalificacionService_Listar(t *testing.T) {
+	repo := new(calificacionRepoMock)
+	esperado := []models.Calificacion{
+		{ID: 1, Comentarios: "Excelente intercambio", UsuarioID: 1},
+		{ID: 2, Comentarios: "Muy buen tratto", UsuarioID: 2},
+	}
+	repo.On("ListarCalificacion").Return(esperado)
+	svc := rlc.NewCalificacionService(repo)
+
+	lista := svc.ListarCalificacion()
+
+	assert.Len(t, lista, 2)
+	assert.Equal(t, "Excelente intercambio", lista[0].Comentarios)
+	repo.AssertExpectations(t)
+}
+
+func TestCalificacionService_Obtener_Exitoso(t *testing.T) {
+	repo := new(calificacionRepoMock)
+	esperado := models.Calificacion{ID: 1, Comentarios: "Excelente intercambio", UsuarioID: 1}
+	repo.On("BuscarCalificacionPorID", 1).Return(esperado, true)
+	svc := rlc.NewCalificacionService(repo)
+
+	encontrado, err := svc.BuscarCalificacion(1)
+
+	require.NoError(t, err)
+	assert.Equal(t, "Excelente intercambio", encontrado.Comentarios)
+	repo.AssertExpectations(t)
+}
+
+func TestCalificacionService_Borrar_Exitoso(t *testing.T) {
+	repo := new(calificacionRepoMock)
+	repo.On("BorrarCalificacion", 1).Return(true)
+	svc := rlc.NewCalificacionService(repo)
+
+	err := svc.BorrarCalificacion(1)
+
+	require.NoError(t, err)
+	repo.AssertExpectations(t)
+}

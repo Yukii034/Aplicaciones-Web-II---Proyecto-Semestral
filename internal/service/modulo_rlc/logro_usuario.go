@@ -7,7 +7,8 @@ import (
 )
 
 type Logro_UsuarioService struct {
-	repo storage.Logro_UsuarioRepository
+	repo  storage.Logro_UsuarioRepository
+	logro storage.LogroRepository
 }
 
 func NewLogro_UsuarioService(repo storage.Logro_UsuarioRepository) *Logro_UsuarioService {

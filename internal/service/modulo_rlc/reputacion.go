@@ -7,7 +7,8 @@ import (
 )
 
 type ReputacionService struct {
-	repo storage.ReputacionRepository
+	repo    storage.ReputacionRepository
+	usuario storage.UserRepository
 }
 
 func NewReputacionService(repo storage.ReputacionRepository) *ReputacionService {
@@ -55,10 +56,12 @@ func (s *ReputacionService) BorrarReputacion(id int) error {
 	return nil
 }
 
-func validarReputacion(r models.Reputacion) error {
-	if r.PuntosTotales == 0 {
+func validarReputacion(p models.Reputacion) error {
+	if p.PuntosTotales == 0 {
 		return se.ErrVacio
 	}
-
+	if p.UsuarioID == 0 {
+		return se.ErrVacio
+	}
 	return nil
 }
