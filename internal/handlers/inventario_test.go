@@ -162,7 +162,7 @@ func registrarYObtenerToken(t *testing.T, h http.Handler) string {
 	}
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp)) // recoge el token en json y lo lee como string
 	require.NotEmpty(t, resp.Token)                             // revisa que no esté vacío
-	return resp.Toke                                            // devuelve el token como string
+	return resp.Token                                           // devuelve el token como string
 }
 
 // TestCrearProducto_Exitoso: POST con token y cuerpo valido -> 201 Creado
