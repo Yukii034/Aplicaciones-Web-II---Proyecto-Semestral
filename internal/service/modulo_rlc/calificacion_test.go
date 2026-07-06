@@ -62,7 +62,7 @@ func TestCalificacionService_Crear(t *testing.T) {
 		},
 		{
 			nombre:        "comentario valido -> sin error y se persiste",
-			entrada:       models.Calificacion{Comentarios: "Excelete intercambio"},
+			entrada:       models.Calificacion{Comentarios: "Excelente intercambio", UsuarioID: 1},
 			errEsperado:   nil,
 			debePersistir: true,
 		},
@@ -116,10 +116,10 @@ func TestCalificacionService_Borrar_NoEncontrado(t *testing.T) {
 
 func TestCalificacionService_Actualizar_NoEncontrado(t *testing.T) {
 	repo := new(calificacionRepoMock)
-	repo.On("ActualizarCalificacion", 999, models.Calificacion{Comentarios: "Buen intercambio"}).Return(models.Calificacion{}, false)
+	repo.On("ActualizarCalificacion", 999, models.Calificacion{Comentarios: "Buen intercambio", UsuarioID: 1}).Return(models.Calificacion{}, false)
 	svc := rlc.NewCalificacionService(repo)
 
-	_, err := svc.ActualizarCalificacion(999, models.Calificacion{Comentarios: "Buen intercambio"})
+	_, err := svc.ActualizarCalificacion(999, models.Calificacion{Comentarios: "Buen intercambio", UsuarioID: 1})
 
 	require.ErrorIs(t, err, service.ErrNoEncontrado)
 	repo.AssertExpectations(t)

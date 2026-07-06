@@ -62,7 +62,7 @@ func TestReputacionService_Crear(t *testing.T) {
 		},
 		{
 			nombre:        "reputacion valido -> sin error y se persiste",
-			entrada:       models.Reputacion{PuntosTotales: 100, Nivel: 20, AcuerdosCompl: 20, CalificacionPromedio: 4.5},
+			entrada:       models.Reputacion{PuntosTotales: 100, Nivel: 2, AcuerdosCompl: 3, CalificacionPromedio: 4.5, UsuarioID: 1},
 			errEsperado:   nil,
 			debePersistir: true,
 		},
@@ -116,10 +116,10 @@ func TestReputacionService_Borrar_NoEncontrado(t *testing.T) {
 
 func TestReputacionService_Actualizar_NoEncontrado(t *testing.T) {
 	repo := new(reputacionRepoMock)
-	repo.On("ActualizarReputacion", 999, models.Reputacion{PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5}).Return(models.Reputacion{}, false)
+	repo.On("ActualizarReputacion", 999, models.Reputacion{PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5, UsuarioID: 1}).Return(models.Reputacion{}, false)
 	svc := rlc.NewReputacionService(repo)
 
-	_, err := svc.ActualizarReputacion(999, models.Reputacion{PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5})
+	_, err := svc.ActualizarReputacion(999, models.Reputacion{PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5, UsuarioID: 1})
 
 	require.ErrorIs(t, err, service.ErrNoEncontrado)
 	repo.AssertExpectations(t)
