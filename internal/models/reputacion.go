@@ -11,4 +11,5 @@ type Reputacion struct {
 	UsuarioID            int       `json:"usuario_id"`
 	CreatedAt            time.Time `json:"created_at"`
 	UpdatedAt            time.Time `json:"updated_at"`
+	Usuario              Usuario   `json:"usuario,omitempty" gorm:"foreignKey:UsuarioID"`
 }

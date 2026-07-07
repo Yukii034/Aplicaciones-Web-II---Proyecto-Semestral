@@ -9,4 +9,6 @@ type Calificacion struct {
 	AcuerdoID   int       `json:"acuerdo_id"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+	Acuerdo     Acuerdo   `json:"acuerdo,omitempty" gorm:"foreignKey:AcuerdoID"`
+	Usuario     Usuario   `json:"usuario,omitempty" gorm:"foreignKey:UsuarioID"`
 }

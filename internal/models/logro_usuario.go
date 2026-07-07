@@ -9,4 +9,6 @@ type Logro_Usuario struct {
 	LogroID    int       `json:"logro_id"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
+	Logro      Logro     `json:"logro,omitempty" gorm:"foreignKey:LogroID"`
+	Usuario    Usuario   `json:"usuario,omitempty" gorm:"foreignKey:UsuarioID"`
 }

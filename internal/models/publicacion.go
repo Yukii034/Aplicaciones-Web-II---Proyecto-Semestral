@@ -13,4 +13,5 @@ type Publicacion struct {
 	UsuarioID         int        `json:"usuario_id"`
 	InventarioID      int        `json:"inventario_id"`
 	Inventario        Inventario `json:"inventario,omitempty" gorm:"foreignKey:InventarioID"` // relacion de gorm formal
+	Usuario           Usuario    `json:"usuario,omitempty" gorm:"foreignKey:UsuarioID"`
 }
