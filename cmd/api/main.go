@@ -135,20 +135,29 @@ func run(cfg config.Config) error {
 			r.Get("/usuarios", servidor.ListarUsuarios)
 			r.Post("/usuarios", servidor.CrearUsuario)
 			r.Get("/usuarios/{id}", servidor.ObtenerUsuario)
-			r.Put("/usuarios/{id}", servidor.ActualizarUsuario)
-			r.Delete("/usuarios/{id}", servidor.EliminarUsuario)
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.SoloAdmin) // editar/borrar cuentas es tarea de admin
+				r.Put("/usuarios/{id}", servidor.ActualizarUsuario)
+				r.Delete("/usuarios/{id}", servidor.EliminarUsuario)
+			})
 
 			r.Get("/acuerdos", servidor.ListarAcuerdo)
 			r.Post("/acuerdos", servidor.CrearAcuerdo)
 			r.Get("/acuerdos/{id}", servidor.ObtenerAcuerdo)
-			r.Put("/acuerdos/{id}", servidor.ActualizarAcuerdo)
-			r.Delete("/acuerdos/{id}", servidor.EliminarAcuerdo)
+			r.Put("/acuerdos/{id}", servidor.ActualizarAcuerdo) // ofertante/solicitante avanzan el flujo del trato
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.SoloAdmin) // borrado definitivo del registro
+				r.Delete("/acuerdos/{id}", servidor.EliminarAcuerdo)
+			})
 
 			r.Get("/acuerdo_items", servidor.ListarAcuerdoItem)
 			r.Post("/acuerdo_items", servidor.CrearAcuerdoItem)
 			r.Get("/acuerdo_items/{id}", servidor.ObtenerAcuerdoItem)
-			r.Put("/acuerdo_items/{id}", servidor.ActualizarAcuerdoItem)
-			r.Delete("/acuerdo_items/{id}", servidor.EliminarAcuerdoItem)
+			r.Put("/acuerdo_items/{id}", servidor.ActualizarAcuerdoItem) // ajustar items mientras se negocia
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.SoloAdmin)
+				r.Delete("/acuerdo_items/{id}", servidor.EliminarAcuerdoItem)
+			})
 		})
 	})
 

@@ -30,7 +30,14 @@ func (s *AcuerdoService) CrearAcuerdo(a models.Acuerdo) (models.Acuerdo, error) 
 	if err := validarAcuerdo(a); err != nil {
 		return models.Acuerdo{}, err
 	}
-	return s.repo.CrearAcuerdo(a), nil
+	creado := s.repo.CrearAcuerdo(a)
+	if creado.ID == 0 {
+		// El insert falló de verdad (ej. publicacion_id/id_ofertante/id_solicitante
+		// que no existen -> viola llave foránea), aunque el repo no propague
+		// un error Go explícito.
+		return models.Acuerdo{}, se.ErrRelacionInvalida
+	}
+	return creado, nil
 }
 
 func (s *AcuerdoService) ActualizarAcuerdo(id int, a models.Acuerdo) (models.Acuerdo, error) {
@@ -54,6 +61,9 @@ func (s *AcuerdoService) BorrarAcuerdo(id int) error {
 func validarAcuerdo(a models.Acuerdo) error {
 	// Valida campos reales de negocio, no el ID autoincremental
 	if a.PublicacionID == 0 || a.Tipo == "" {
+		return se.ErrVacio
+	}
+	if a.IDOfertante == 0 || a.IDSolicitante == 0 {
 		return se.ErrVacio
 	}
 	return nil

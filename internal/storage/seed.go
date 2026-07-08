@@ -90,7 +90,7 @@ func (a *AlmacenSQLite) SembrarSiVacio() {
 	acuerdo := a.CrearAcuerdo(models.Acuerdo{
 		PublicacionID:            pub.ID,
 		IDOfertante:              u2.ID,
-		IDPublicador:             u1.ID,
+		IDSolicitante:            u1.ID,
 		Tipo:                     "intercambio",
 		Estado:                   "pendiente",
 		Mensaje_Inicial:          "Me interesa la silla",

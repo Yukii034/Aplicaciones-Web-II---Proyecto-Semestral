@@ -1,0 +1,469 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Proyecto AppsWebII - AIU - Usuario, Acuerdos, Acuerdos_Ítem",
+    "version": "1.0.0",
+    "description": ""
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "paths": {
+    "/api/v1/usuarios": {
+      "get": {
+        "summary": "Listar Usuario",
+        "responses": {},
+        "tags": [
+          "Usuario"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Crear Usuario",
+        "responses": {},
+        "tags": [
+          "Usuario"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "tipo": {
+                    "type": "string"
+                  },
+                  "ciudad": {
+                    "type": "string"
+                  },
+                  "telefono": {
+                    "type": "string",
+                    "format": "utc-millisec"
+                  },
+                  "reputacion": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "nombre": "Juan Perez",
+                "email": "juan4@perez.com",
+                "tipo": "cliente",
+                "ciudad": "Manta",
+                "telefono": "+593999999999",
+                "reputacion": "buena"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/usuarios/3": {
+      "get": {
+        "summary": "Obtener Usuario por ID",
+        "responses": {},
+        "tags": [
+          "Usuario"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/usuarios/11": {
+      "put": {
+        "summary": "Actualizar Usuario",
+        "responses": {},
+        "tags": [
+          "Usuario"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "tipo": {
+                    "type": "string"
+                  },
+                  "ciudad": {
+                    "type": "string"
+                  },
+                  "telefono": {
+                    "type": "string",
+                    "format": "utc-millisec"
+                  },
+                  "reputacion": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "nombre": "Juan Perez",
+                "email": "juan@perez.com",
+                "tipo": "cliente",
+                "ciudad": "Portoviejo",
+                "telefono": "+593999999999",
+                "reputacion": "buena"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/usuarios/1": {
+      "delete": {
+        "summary": "Borrar Usuario",
+        "responses": {},
+        "tags": [
+          "Usuario"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/acuerdo_items": {
+      "get": {
+        "summary": "Listar Acuerdo_Item",
+        "responses": {},
+        "tags": [
+          "Acuerdo_Item"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Crear Acuerdo_Item",
+        "responses": {},
+        "tags": [
+          "Acuerdo_Item"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "acuerdo_id": {
+                    "type": "integer"
+                  },
+                  "inventario_id": {
+                    "type": "integer"
+                  },
+                  "rol": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "acuerdo_id": 1,
+                "inventario_id": 1,
+                "rol": "ofrecido"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/acuerdo_items/1": {
+      "get": {
+        "summary": "Obtener Acuerdo_Item por ID",
+        "responses": {},
+        "tags": [
+          "Acuerdo_Item"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Actualizar Acuerdo_Item",
+        "responses": {},
+        "tags": [
+          "Acuerdo_Item"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "acuerdo_id": {
+                    "type": "integer"
+                  },
+                  "inventario_id": {
+                    "type": "integer"
+                  },
+                  "rol": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "acuerdo_id": 1,
+                "inventario_id": 1,
+                "rol": "solicitado"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Borrar Acuerdo_Item",
+        "responses": {},
+        "tags": [
+          "Acuerdo_Item"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/acuerdos": {
+      "get": {
+        "summary": "Listar Acuerdo",
+        "responses": {},
+        "tags": [
+          "Acuerdo"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Crear Acuerdo",
+        "responses": {},
+        "tags": [
+          "Acuerdo"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "publicacion_id": {
+                    "type": "integer"
+                  },
+                  "id_ofertante": {
+                    "type": "integer"
+                  },
+                  "id_solicitante": {
+                    "type": "integer"
+                  },
+                  "tipo": {
+                    "type": "string"
+                  },
+                  "estado": {
+                    "type": "string"
+                  },
+                  "mensaje_inicial": {
+                    "type": "string"
+                  },
+                  "motivo_cancelacion": {
+                    "type": "string"
+                  },
+                  "confirmacion_solicitante": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "publicacion_id": 1,
+                "id_ofertante": 1,
+                "id_solicitante": 2,
+                "tipo": "intercambio",
+                "estado": "pendiente",
+                "mensaje_inicial": "Me interesa la publicacion",
+                "motivo_cancelacion": "",
+                "confirmacion_solicitante": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/acuerdos/1": {
+      "get": {
+        "summary": "Obtener Acuerdo por ID",
+        "responses": {},
+        "tags": [
+          "Acuerdo"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Actualizar Acuerdo",
+        "responses": {},
+        "tags": [
+          "Acuerdo"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "publicacion_id": {
+                    "type": "integer"
+                  },
+                  "id_ofertante": {
+                    "type": "integer"
+                  },
+                  "id_solicitante": {
+                    "type": "integer"
+                  },
+                  "tipo": {
+                    "type": "string"
+                  },
+                  "estado": {
+                    "type": "string"
+                  },
+                  "mensaje_inicial": {
+                    "type": "string"
+                  },
+                  "motivo_cancelacion": {
+                    "type": "string"
+                  },
+                  "confirmacion_solicitante": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "publicacion_id": 1,
+                "id_ofertante": 1,
+                "id_solicitante": 2,
+                "tipo": "intercambio",
+                "estado": "aceptado",
+                "mensaje_inicial": "Me interesa la publicacion",
+                "motivo_cancelacion": "",
+                "confirmacion_solicitante": true
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Borrar Acuerdo",
+        "responses": {},
+        "tags": [
+          "Acuerdo"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "summary": "Auth",
+        "responses": {},
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "tipo": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "email": "admin@test.com",
+                "password": "secreta123",
+                "tipo": "admin"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

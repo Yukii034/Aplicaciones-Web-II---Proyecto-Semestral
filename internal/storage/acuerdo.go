@@ -1,6 +1,10 @@
 package storage
 
-import "proyecto-semestral/internal/models"
+import (
+	"proyecto-semestral/internal/models"
+
+	"gorm.io/gorm/clause"
+)
 
 func (a *AlmacenSQLite) ListarAcuerdos() []models.Acuerdo {
 	var acuerdos []models.Acuerdo
@@ -17,7 +21,10 @@ func (a *AlmacenSQLite) BuscarAcuerdoPorID(id int) (models.Acuerdo, bool) {
 }
 
 func (a *AlmacenSQLite) CrearAcuerdo(acuerdo models.Acuerdo) models.Acuerdo {
-	a.db.Create(&acuerdo) // GORM rellena el ID autogenerado en &p
+	// Omit(clause.Associations) evita que GORM intente crear/actualizar
+	// Publicacion/Ofertante/Solicitante (que llegan como structs vacios
+	// con PK=0) al crear el Acuerdo; solo queremos guardar las FKs.
+	a.db.Omit(clause.Associations).Create(&acuerdo)
 	return acuerdo
 }
 

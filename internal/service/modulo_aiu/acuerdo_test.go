@@ -2,6 +2,7 @@ package modulo_aiu_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -60,7 +61,7 @@ func TestAcuerdoService_Crear(t *testing.T) {
 			entrada: models.Acuerdo{
 				PublicacionID: 0,
 				IDOfertante:   10,
-				IDPublicador:  20,
+				IDSolicitante: 20,
 				Tipo:          "Intercambio",
 				Estado:        "Pendiente",
 			},
@@ -72,7 +73,7 @@ func TestAcuerdoService_Crear(t *testing.T) {
 			entrada: models.Acuerdo{
 				PublicacionID: 5,
 				IDOfertante:   10,
-				IDPublicador:  20,
+				IDSolicitante: 20,
 				Tipo:          "",
 				Estado:        "Pendiente",
 			},
@@ -84,7 +85,7 @@ func TestAcuerdoService_Crear(t *testing.T) {
 			entrada: models.Acuerdo{
 				PublicacionID:            5,
 				IDOfertante:              10,
-				IDPublicador:             20,
+				IDSolicitante:            20,
 				Tipo:                     "Permuta",
 				Estado:                   "Pendiente",
 				Mensaje_Inicial:          "Hola, me interesa tu publicación.",
@@ -103,8 +104,8 @@ func TestAcuerdoService_Crear(t *testing.T) {
 			if c.debePersistir {
 				guardado := c.entrada
 				guardado.ID = 1
-				guardado.CreatedAt = "2026-06-28"
-				guardado.UpdatedAt = "2026-06-28"
+				guardado.CreatedAt = time.Now()
+				guardado.UpdatedAt = time.Now()
 
 				// CORRECCIÓN: Usamos MatchedBy para que acepte cualquier estructura models.Acuerdo
 				// sin importar si el service alteró algún campo interno (como fechas o estados por defecto).

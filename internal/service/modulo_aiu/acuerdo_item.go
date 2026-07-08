@@ -30,7 +30,14 @@ func (s *AcuerdoItemService) CrearAcuerdoItem(a models.AcuerdoItem) (models.Acue
 	if err := validarAcuerdoItem(a); err != nil {
 		return models.AcuerdoItem{}, err
 	}
-	return s.repo.CrearAcuerdoItem(a), nil
+	creado := s.repo.CrearAcuerdoItem(a)
+	if creado.ID == 0 {
+		// El insert falló de verdad (ej. acuerdo_id/inventario_id que no
+		// existen -> viola llave foránea), aunque el repo no propague
+		// un error Go explícito.
+		return models.AcuerdoItem{}, se.ErrRelacionInvalida
+	}
+	return creado, nil
 }
 
 func (s *AcuerdoItemService) ActualizarAcuerdoItem(id int, a models.AcuerdoItem) (models.AcuerdoItem, error) {
