@@ -30,7 +30,13 @@ func (s *UsuarioService) CrearUsuario(u models.Usuario) (models.Usuario, error) 
 	if err := validarUsuario(u); err != nil {
 		return models.Usuario{}, err
 	}
-	return s.repo.CrearUsuario(u), nil
+	creado := s.repo.CrearUsuario(u)
+	if creado.ID == 0 {
+		// El insert falló de verdad (ej. email duplicado -> viola unique),
+		// aunque el repo no propague un error Go explícito.
+		return models.Usuario{}, se.ErrRelacionInvalida
+	}
+	return creado, nil
 }
 
 func (s *UsuarioService) ActualizarUsuario(id int, u models.Usuario) (models.Usuario, error) {

@@ -1,6 +1,10 @@
 package storage
 
-import "proyecto-semestral/internal/models"
+import (
+	"proyecto-semestral/internal/models"
+
+	"gorm.io/gorm/clause"
+)
 
 func (a *AlmacenSQLite) ListarAcuerdoItems() []models.AcuerdoItem {
 	var items []models.AcuerdoItem
@@ -17,7 +21,9 @@ func (a *AlmacenSQLite) BuscarAcuerdoItemPorID(id int) (models.AcuerdoItem, bool
 }
 
 func (a *AlmacenSQLite) CrearAcuerdoItem(item models.AcuerdoItem) models.AcuerdoItem {
-	a.db.Create(&item) // GORM rellena el ID autogenerado en &p
+	// Igual que en CrearAcuerdo: evitamos que GORM intente crear el
+	// Acuerdo/Inventario anidados (structs vacios con PK=0) al guardar el item.
+	a.db.Omit(clause.Associations).Create(&item)
 	return item
 }
 
