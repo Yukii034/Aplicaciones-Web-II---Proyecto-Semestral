@@ -77,6 +77,32 @@ func (m *inventarioRepoMockP) BorrarInventario(id int) bool {
 
 var _ storage.InventarioRepository = (*inventarioRepoMockP)(nil)
 
+// Mock usuario (para relacion)
+type usuarioRepoMockP struct {
+	mock.Mock
+}
+
+func (m *usuarioRepoMockP) ListarUsuarios() []models.Usuario { return nil }
+
+func (m *usuarioRepoMockP) BuscarUsuarioPorID(id int) (models.Usuario, bool) {
+	args := m.Called(id)
+	return args.Get(0).(models.Usuario), args.Bool(1)
+}
+
+func (m *usuarioRepoMockP) BuscarUsuarioPorEmail(email string) (models.Usuario, bool) {
+	return models.Usuario{}, false
+}
+
+func (m *usuarioRepoMockP) CrearUsuario(u models.Usuario) models.Usuario { return u }
+
+func (m *usuarioRepoMockP) ActualizarUsuario(id int, datos models.Usuario) (models.Usuario, bool) {
+	return models.Usuario{}, false
+}
+
+func (m *usuarioRepoMockP) BorrarUsuario(id int) bool { return false }
+
+var _ storage.UserRepository = (*usuarioRepoMockP)(nil)
+
 // --- Tests ---
 func TestPublicacionService_Crear(t *testing.T) {
 	casos := []struct {
@@ -93,7 +119,7 @@ func TestPublicacionService_Crear(t *testing.T) {
 		},
 		{
 			nombre:        "publicacion valida -> sin error y se persiste",
-			entrada:       models.Publicacion{Titulo: "Cambio laptop", TipoOferta: "intercambio", InventarioID: 1},
+			entrada:       models.Publicacion{Titulo: "Cambio laptop", TipoOferta: "intercambio", InventarioID: 1, UsuarioID: 1},
 			errEsperado:   nil,
 			debePersistir: true,
 		},
@@ -108,15 +134,15 @@ func TestPublicacionService_Crear(t *testing.T) {
 				repo.On("CrearPublicacion", c.entrada).Return(guardado)
 			}
 			invRepo := new(inventarioRepoMockP)
+			usrRepo := new(usuarioRepoMockP)
 			if c.debePersistir {
 				guardado := c.entrada
 				guardado.ID = 1
 				repo.On("CrearPublicacion", c.entrada).Return(guardado)
-				// el inventario con ID 1 existe
 				invRepo.On("BuscarInventarioPorID", 1).Return(models.Inventario{ID: 1}, true)
+				usrRepo.On("BuscarUsuarioPorID", 1).Return(models.Usuario{ID: 1}, true)
 			}
-
-			svc := pi.NewPublicacionService(repo, invRepo)
+			svc := pi.NewPublicacionService(repo, invRepo, usrRepo)
 
 			creada, err := svc.CrearPublicacion(c.entrada)
 
@@ -136,7 +162,7 @@ func TestPublicacionService_Obtener_NoEncontrado(t *testing.T) {
 	repo := new(publicacionRepoMock)
 	repo.On("BuscarPublicacionPorID", 999).Return(models.Publicacion{}, false)
 	invRepo := new(inventarioRepoMockP)
-	svc := pi.NewPublicacionService(repo, invRepo)
+	svc := pi.NewPublicacionService(repo, invRepo, &usuarioRepoMockP{})
 
 	_, err := svc.BuscarPublicacion(999)
 
@@ -148,7 +174,7 @@ func TestPublicacionService_Borrar_NoEncontrado(t *testing.T) {
 	repo := new(publicacionRepoMock)
 	repo.On("BorrarPublicacion", 999).Return(false)
 	invRepo := new(inventarioRepoMockP)
-	svc := pi.NewPublicacionService(repo, invRepo)
+	svc := pi.NewPublicacionService(repo, invRepo, &usuarioRepoMockP{})
 
 	err := svc.BorrarPublicacion(999)
 
@@ -166,7 +192,7 @@ func TestPublicacionService_Actualizar_NoEncontrado(t *testing.T) {
 	// pero la publicacion con id 999 no existe
 	repo.On("ActualizarPublicacion", 999, models.Publicacion{Titulo: "Cambio laptop", TipoOferta: "intercambio"}).Return(models.Publicacion{}, false)
 
-	svc := pi.NewPublicacionService(repo, invRepo)
+	svc := pi.NewPublicacionService(repo, invRepo, &usuarioRepoMockP{})
 
 	_, err := svc.ActualizarPublicacion(999, models.Publicacion{Titulo: "Cambio laptop", TipoOferta: "intercambio"})
 
@@ -177,7 +203,7 @@ func TestPublicacionService_Actualizar_NoEncontrado(t *testing.T) {
 func TestPublicacionService_Actualizar_TituloVacio(t *testing.T) {
 	repo := new(publicacionRepoMock)
 	invRepo := new(inventarioRepoMockP)
-	svc := pi.NewPublicacionService(repo, invRepo)
+	svc := pi.NewPublicacionService(repo, invRepo, &usuarioRepoMockP{})
 
 	_, err := svc.ActualizarPublicacion(1, models.Publicacion{Titulo: ""})
 
@@ -193,7 +219,7 @@ func TestPublicacionService_Listar(t *testing.T) {
 	}
 	repo.On("ListarPublicacion").Return(esperado)
 	invRepo := new(inventarioRepoMockP)
-	svc := pi.NewPublicacionService(repo, invRepo)
+	svc := pi.NewPublicacionService(repo, invRepo, &usuarioRepoMockP{})
 
 	lista := svc.ListarPublicacion()
 
@@ -207,7 +233,7 @@ func TestPublicacionService_Obtener_Exitoso(t *testing.T) {
 	esperado := models.Publicacion{ID: 1, Titulo: "Cambio laptop", TipoOferta: "intercambio"}
 	repo.On("BuscarPublicacionPorID", 1).Return(esperado, true)
 	invRepo := new(inventarioRepoMockP)
-	svc := pi.NewPublicacionService(repo, invRepo)
+	svc := pi.NewPublicacionService(repo, invRepo, &usuarioRepoMockP{})
 
 	encontrada, err := svc.BuscarPublicacion(1)
 
@@ -220,7 +246,7 @@ func TestPublicacionService_Borrar_Exitoso(t *testing.T) {
 	repo := new(publicacionRepoMock)
 	repo.On("BorrarPublicacion", 1).Return(true)
 	invRepo := new(inventarioRepoMockP)
-	svc := pi.NewPublicacionService(repo, invRepo)
+	svc := pi.NewPublicacionService(repo, invRepo, &usuarioRepoMockP{})
 
 	err := svc.BorrarPublicacion(1)
 
@@ -232,7 +258,7 @@ func TestPublicacionService_Crear_InventarioNoExiste(t *testing.T) {
 	repo := new(publicacionRepoMock)
 	invRepo := new(inventarioRepoMockP)
 	invRepo.On("BuscarInventarioPorID", 99).Return(models.Inventario{}, false)
-	svc := pi.NewPublicacionService(repo, invRepo)
+	svc := pi.NewPublicacionService(repo, invRepo, &usuarioRepoMockP{})
 
 	_, err := svc.CrearPublicacion(models.Publicacion{
 		Titulo:       "Cambio laptop",
@@ -248,7 +274,7 @@ func TestPublicacionService_Actualizar_InventarioNoExiste(t *testing.T) {
 	repo := new(publicacionRepoMock)
 	invRepo := new(inventarioRepoMockP)
 	invRepo.On("BuscarInventarioPorID", 99).Return(models.Inventario{}, false)
-	svc := pi.NewPublicacionService(repo, invRepo)
+	svc := pi.NewPublicacionService(repo, invRepo, &usuarioRepoMockP{})
 
 	_, err := svc.ActualizarPublicacion(1, models.Publicacion{
 		Titulo:       "Cambio laptop",

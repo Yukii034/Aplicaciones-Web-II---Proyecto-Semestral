@@ -70,10 +70,10 @@ func construirEntornoP(t *testing.T) (http.Handler, string) {
 	t.Helper()
 
 	pubFake := &publicacionFake{nextID: 1}
-	usuFake := nuevoUsuarioFake() // viene de inventario_test.go
-
+	usuFake := nuevoUsuarioFake()    // viene de inventario_test.go
 	invFake := nuevoInventarioFake() // para la relacion
-	pubService := pi.NewPublicacionService(pubFake, invFake)
+
+	pubService := pi.NewPublicacionService(pubFake, invFake, usuFake)
 	authService := service.NuevoAuthService(usuFake)
 
 	srv := handlers.NewServer(handlers.Deps{
