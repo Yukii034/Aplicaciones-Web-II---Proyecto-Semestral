@@ -1,109 +1,359 @@
-# **Aplicaciones-Web-II---Proyecto-Semestral**
+# Plataforma de Intercambios y Donaciones Locales
+### API Backend · TDI-601 Aplicaciones Web II · 2026-1
+### Universidad Laica Eloy Alfaro de Manabí
 
-# **Descripcion:**
-# El proyecto tratara de una API REST construida en GO que conecta a las personas y negocios que tienen productos que ya no necesitan como ropa, electrodomésticos, alimentos que estan próximos a vencer, etc. Con personas que si lo necesiten o estan dispuestas a intercambiar algo a cambio.
+---
 
-# **El problema que resuelve es simple:** quién quiere donar o intercambiar algo no sabe quien lo necesita cerca y quién necesita algo no sabe dónde poder buscarlo, las soluciones actuales como el Facebook Marketplace o grupos de WhatsApp no fueron diseñadAs principalmente con ese fin, están mas orientados a la compra-venta con dinero y depende de contactos previos o una cercanía fisica.
+## ¿Qué es este proyecto?
 
-# **Nuestra API ofrece un canal local y centralizado con tres módulos de dominio:**
-# **• Publicación:** Los usuarios registran productos disponibles para donaciones o intercambio, la app se encarga de marcarlos si esta disponible, reservado o entregado.
+API REST construida en Go que conecta a personas y negocios que tienen productos que ya no necesitan — ropa, electrodomésticos, alimentos próximos a vencer — con personas dispuestas a recibirlos o intercambiar algo a cambio.
 
-# **• Transacciones:** Cuando el cliente quiere un producto, se genera lo que es un acuerdos entre las dos partes que pasa por diferentes etapas: propuesto, aceptado y completado, ambos usuarios deben confirmar que la entrega ocurrió.
+El problema que resuelve: quien quiere donar o intercambiar algo no sabe quién lo necesita cerca, y quien necesita algo no sabe dónde buscarlo. Las soluciones actuales como Facebook Marketplace están orientadas a la compra-venta con dinero y dependen de contactos previos. Nuestra API ofrece un canal local y centralizado.
 
-# **• Reputación:** Se construye un perfil de confianza de cada usuario que muestra sus puntos, niveles y logros desbloqueados, así la gente pueda confiar en la otra persona antes de poder hacer un trato y no genere desconfianza  
+---
 
-# **Tech Stack (Stack Tecnológico o Tecnologías a Utilizar):**
-# **• Go 1.22+:** Lenguaje de programación de alto rendimiento utilizado para el desarrollo del backend, aprovechando su eficiencia en el manejo de concurrencia.
-# **• Chi Router:** Framework ligero y minimalista para Go que permite gestionar las rutas de la API de forma rápida y con un control total sobre el flujo HTTP.
-# **• GORM:** Herramienta de mapeo objeto-relacional (ORM) para Go que simplifica la interacción con la base de datos y la gestión de modelos complejos.
-# **• Golang-JWT:** Librería encargada de la generación y validación de tokens de seguridad para garantizar una autenticación confiable en cada petición del usuario.
-# **• Testify:** Suite de herramientas para pruebas unitarias en Go que facilita la escritura de tests descriptivos y asegura la estabilidad de la lógica de negocio.
-# **• Docker:** Plataforma de contenedores que permite estandarizar el entorno de desarrollo y despliegue, asegurando que la API funcione igual en cualquier servidor.
-# **• SQLite (Desarrollo):** Base de datos relacional ligera basada en archivos, ideal para realizar pruebas rápidas y desarrollo local sin dependencias externas.
-# **• PostgreSQL (Producción):** Sistema de base de datos robusto y escalable utilizado para el entorno final, garantizando la persistencia y seguridad de la información.
-# **• Git:** Sistema de control de versiones distribuido que permite registrar cada cambio realizado en el código y trabajar de forma segura en diferentes ramas.
-# **• GitHub:** Plataforma en la nube que aloja el repositorio del proyecto, facilitando la colaboración entre los miembros del equipo y la integración del código.
+## Quién construyó cada módulo
 
-# **URL a documentos anexos:**  https://uleam-my.sharepoint.com/:f:/g/personal/e1350140990_live_uleam_edu_ec/IgDPcqsDRv5gRJwr6v39Be3IAdZLn4wA85WITu23YC422JA?e=QhxhUm
+| Módulo | Responsable | Entidades |
+|---|---|---|
+| Publicaciones e Inventario | Pierina Peñaherrera | `Inventario`, `Publicacion` |
+| Reputación, Logros y Calificaciones | José Manuel Castillo | `Reputacion`, `Logro`, `Logro_Usuario`, `Calificacion` |
+| Acuerdos, Items y Usuarios | Néstor Gallegos | `Acuerdo`, `AcuerdoItem`, `Usuario` |
 
-# **Arquitectura del Proyecto**
+---
 
-# Aplicaciones-Web-II---Proyecto-Semestral/
-# ├── cmd/
-# │   └── api/
-# │       └── main.go              # punto de entrada, arma dependencias y rutas
-# │
-# ├── internal/
-# │   ├── config/
-# │   │   └── config.go            # variables de entorno / .env
-# │   │
-# │   ├── handlers/                # capa HTTP: decodifica, llama al service, responde
-# │   │   ├── server.go            # struct Server + Deps
-# │   │   ├── respond.go           # RespondJSON/RespondError + mapeo de errores -> status
-# │   │   ├── params.go
-# │   │   ├── auth.go
-# │   │   ├── seed.go
-# │   │   ├── acuerdo.go
-# │   │   ├── acuerdo_item.go
-# │   │   ├── usuario.go
-# │   │   ├── publicacion.go
-# │   │   ├── inventario.go
-# │   │   ├── reputacion.go
-# │   │   ├── logro.go
-# │   │   ├── logro_usuario.go
-# │   │   └── calificacion.go
-# │   │
-# │   ├── service/                 # lógica de negocio / validaciones
-# │   │   ├── auth.go              # JWT + bcrypt
-# │   │   ├── errores.go           # ErrNoEncontrado, ErrVacio, ErrRelacionInvalida, etc.
-# │   │   ├── modulo_aiu/          # Acuerdos, Acuerdo_Item, Usuarios
-# │   │   │   ├── acuerdo.go
-# │   │   │   ├── acuerdo_item.go
-# │   │   │   └── usuario.go
-# │   │   ├── modulo_pi/           # Publicación, Inventario
-# │   │   │   ├── publicacion.go
-# │   │   │   └── inventario.go
-# │   │   └── modulo_rlc/          # Reputación, Logro, Logro_Usuario, Calificación
-# │   │       ├── reputacion.go
-# │   │       ├── logro.go
-# │   │       ├── logro_usuario.go
-# │   │       └── calificacion.go
-# │   │
-# │   ├── storage/                 # acceso a datos (GORM)
-# │   │   ├── almacen.go           # interfaces (Almacen, AcuerdoRepository, etc.)
-# │   │   ├── almacen_sqlite.go
-# │   │   ├── factory.go           # elige/abre sqlite o postgres + AutoMigrate
-# │   │   ├── seed.go              # datos de ejemplo
-# │   │   ├── acuerdo.go
-# │   │   ├── acuerdo_items.go
-# │   │   ├── usuario.go
-# │   │   ├── publicacion.go
-# │   │   ├── inventario.go
-# │   │   ├── reputacion.go
-# │   │   ├── logro.go
-# │   │   ├── logro_usuario.go
-# │   │   └── calificacion.go
-# │   │
-# │   ├── models/                  # structs compartidos (entidades)
-# │   │   ├── acuerdo.go
-# │   │   ├── acuerdo_item.go
-# │   │   ├── usuarios.go
-# │   │   ├── publicacion.go
-# │   │   ├── inventario.go
-# │   │   ├── reputacion.go
-# │   │   ├── logro.go
-# │   │   ├── logro_usuario.go
-# │   │   └── calificacion.go
-# │   │
-# │   ├── middleware/
-# │   │   ├── auth.go              # valida JWT, SoloAdmin (roles)
-# │   │   └── cors.go
-# │   │
-# │   └── httpserver/
-# │       └── httpserver.go        # wrapper de http.Server + graceful shutdown
-# │
-# ├── postman/                     # colecciones y environments
-# ├── Dockerfile
-# ├── docker-compose.yaml
-# ├── go.mod / go.sum
-# └── README.md
+## Stack Tecnológico
+
+| Tecnología | Uso |
+|---|---|
+| Go 1.26+ | Lenguaje principal del backend |
+| Chi Router | Manejo de rutas HTTP |
+| GORM | ORM para acceso a datos |
+| Golang-JWT + bcrypt | Autenticación y seguridad |
+| Testify | Tests unitarios con mocks |
+| Docker + docker-compose | Contenedores y orquestación |
+| SQLite | Base de datos para desarrollo local |
+| PostgreSQL | Base de datos para producción (Docker) |
+| GitHub Actions | CI/CD (build → vet → test) |
+
+---
+
+## Cómo correrlo
+
+### Requisitos
+- Docker Desktop instalado y corriendo
+- Git
+
+### Levantar con Docker
+
+```bash
+git clone https://github.com/Yukii034/Aplicaciones-Web-II---Proyecto-Semestral.git
+cd Aplicaciones-Web-II---Proyecto-Semestral
+docker-compose up --build
+```
+
+La API quedará disponible en `http://localhost:8080`. Docker levanta automáticamente la API y PostgreSQL sin pasos adicionales.
+
+Para cargar datos de ejemplo una vez que el contenedor esté corriendo:
+```bash
+curl -X POST http://localhost:8080/api/v1/seed
+```
+
+Para detener los contenedores:
+```bash
+docker-compose down
+```
+
+---
+
+## Endpoints
+
+### Auth (grupal)
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| POST | `/api/v1/auth/register` | Registrar usuario (tipo: persona, empresa, admin) | No |
+| POST | `/api/v1/auth/login` | Login, devuelve JWT | No |
+| POST | `/api/v1/seed` | Cargar datos de ejemplo | No |
+
+---
+
+### Módulo de Publicaciones e Inventario — Pierina Peñaherrera
+
+#### Inventario
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/inventario` | Listar todos los items | Bearer |
+| GET | `/api/v1/inventario/{id}` | Obtener item por ID | Bearer |
+| POST | `/api/v1/inventario` | Crear item en inventario | Bearer |
+| PUT | `/api/v1/inventario/{id}` | Actualizar item | Bearer |
+| DELETE | `/api/v1/inventario/{id}` | Borrar item | Bearer |
+
+Ejemplo de body para crear:
+```json
+{
+    "nombre": "Laptop Dell",
+    "descripcion": "En buen estado",
+    "categoria": "Tecnología",
+    "estado_objeto": "usado",
+    "disponibilidad": "disponible",
+    "cantidad": 1
+}
+```
+
+#### Publicaciones
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/publicaciones` | Listar publicaciones | Bearer |
+| GET | `/api/v1/publicaciones/{id}` | Obtener publicacion por ID | Bearer |
+| POST | `/api/v1/publicaciones` | Crear publicacion | Bearer |
+| PUT | `/api/v1/publicaciones/{id}` | Actualizar publicacion | Bearer |
+| DELETE | `/api/v1/publicaciones/{id}` | Borrar publicacion | Bearer |
+
+Ejemplo de body para crear:
+```json
+{
+    "titulo": "Cambio laptop por tablet",
+    "tipo_oferta": "intercambio",
+    "estado_publicacion": "disponible",
+    "mensaje": "Acepto tablet de buena marca",
+    "inventario_id": 1
+}
+```
+
+> **Nota:** Al crear o actualizar una publicacion se valida que el `inventario_id` exista. Si no existe devuelve 404.
+
+---
+
+### Módulo de Reputación, Logros y Calificaciones — José Manuel Castillo
+
+#### Reputación
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/reputaciones` | Listar reputaciones | Bearer |
+| GET | `/api/v1/reputaciones/{id}` | Obtener por ID | Bearer |
+| POST | `/api/v1/reputaciones` | Crear reputacion | Bearer |
+| PUT | `/api/v1/reputaciones/{id}` | Actualizar | Bearer + Admin |
+| DELETE | `/api/v1/reputaciones/{id}` | Borrar | Bearer + Admin |
+
+#### Logros
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/logros` | Listar logros | Bearer |
+| GET | `/api/v1/logros/{id}` | Obtener por ID | Bearer |
+| POST | `/api/v1/logros` | Crear logro | Bearer + Admin |
+| PUT | `/api/v1/logros/{id}` | Actualizar | Bearer + Admin |
+| DELETE | `/api/v1/logros/{id}` | Borrar | Bearer + Admin |
+
+#### Logros de Usuario
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/logro_usuarios` | Listar logros de usuario | Bearer |
+| GET | `/api/v1/logro_usuarios/{id}` | Obtener por ID | Bearer |
+| POST | `/api/v1/logro_usuarios` | Asignar logro a usuario | Bearer + Admin |
+| PUT | `/api/v1/logro_usuarios/{id}` | Actualizar | Bearer + Admin |
+| DELETE | `/api/v1/logro_usuarios/{id}` | Borrar | Bearer + Admin |
+
+#### Calificaciones
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/calificaciones` | Listar calificaciones | Bearer |
+| GET | `/api/v1/calificaciones/{id}` | Obtener por ID | Bearer |
+| POST | `/api/v1/calificaciones` | Crear calificacion | Bearer |
+| PUT | `/api/v1/calificaciones/{id}` | Actualizar | Bearer |
+| DELETE | `/api/v1/calificaciones/{id}` | Borrar | Bearer |
+
+---
+
+### Módulo de Acuerdos y Transacciones — Néstor Gallegos
+
+#### Usuarios
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/usuarios` | Listar usuarios | Bearer + Admin |
+| GET | `/api/v1/usuarios/{id}` | Obtener por ID | Bearer + Admin |
+| POST | `/api/v1/usuarios` | Crear usuario | Bearer + Admin |
+| PUT | `/api/v1/usuarios/{id}` | Actualizar | Bearer + Admin |
+| DELETE | `/api/v1/usuarios/{id}` | Borrar | Bearer + Admin |
+
+#### Acuerdos
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/acuerdos` | Listar acuerdos | Bearer |
+| GET | `/api/v1/acuerdos/{id}` | Obtener por ID | Bearer |
+| POST | `/api/v1/acuerdos` | Crear acuerdo | Bearer |
+| PUT | `/api/v1/acuerdos/{id}` | Avanzar flujo del trato | Bearer |
+| DELETE | `/api/v1/acuerdos/{id}` | Borrar | Bearer |
+
+#### Acuerdo Items
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/acuerdo_items` | Listar items de acuerdo | Bearer |
+| GET | `/api/v1/acuerdo_items/{id}` | Obtener por ID | Bearer |
+| POST | `/api/v1/acuerdo_items` | Crear item de acuerdo | Bearer |
+| PUT | `/api/v1/acuerdo_items/{id}` | Ajustar items mientras se negocia | Bearer |
+| DELETE | `/api/v1/acuerdo_items/{id}` | Borrar | Bearer |
+
+---
+
+## Arquitectura
+
+El proyecto sigue una arquitectura en capas: cada request pasa por handler → service → repository antes de llegar a la base de datos. Los módulos de dominio están separados en sus propias carpetas dentro de `service/`.
+
+```
+Request HTTP
+     ↓
+  Handler          (internal/handlers/)
+     ↓
+  Service          (internal/service/modulo_*)
+     ↓
+  Repository       (internal/storage/)
+     ↓
+  Base de datos    (PostgreSQL via GORM)
+```
+
+```
+Aplicaciones-Web-II---Proyecto-Semestral/
+├── cmd/
+│   └── api/
+│       └── main.go              # punto de entrada, arma dependencias y rutas
+│
+├── internal/
+│   ├── config/
+│   │   └── config.go            # variables de entorno / .env
+│   │
+│   ├── handlers/                # capa HTTP: decodifica, llama al service, responde
+│   │   ├── server.go            # struct Server + Deps
+│   │   ├── respond.go           # RespondJSON/RespondError
+│   │   ├── params.go
+│   │   ├── auth.go
+│   │   ├── seed.go
+│   │   ├── acuerdo.go
+│   │   ├── acuerdo_item.go
+│   │   ├── usuario.go
+│   │   ├── publicacion.go
+│   │   ├── inventario.go
+│   │   ├── reputacion.go
+│   │   ├── logro.go
+│   │   ├── logro_usuario.go
+│   │   └── calificacion.go
+│   │
+│   ├── service/                 # lógica de negocio / validaciones
+│   │   ├── auth.go              # JWT + bcrypt
+│   │   ├── errores.go           # ErrNoEncontrado, ErrVacio, etc.
+│   │   ├── modulo_aiu/          # Acuerdos, AcuerdoItem, Usuarios
+│   │   │   ├── acuerdo.go
+│   │   │   ├── acuerdo_item.go
+│   │   │   └── usuario.go
+│   │   ├── modulo_pi/           # Publicación, Inventario
+│   │   │   ├── publicacion.go
+│   │   │   └── inventario.go
+│   │   └── modulo_rlc/          # Reputación, Logro, Logro_Usuario, Calificación
+│   │       ├── reputacion.go
+│   │       ├── logro.go
+│   │       ├── logro_usuario.go
+│   │       └── calificacion.go
+│   │
+│   ├── storage/                 # acceso a datos (GORM)
+│   │   ├── almacen.go           # interfaces (Almacen, repositorios, etc.)
+│   │   ├── almacen_sqlite.go
+│   │   ├── factory.go           # abre sqlite o postgres + AutoMigrate
+│   │   ├── seed.go              # datos de ejemplo
+│   │   ├── acuerdo.go
+│   │   ├── acuerdo_items.go
+│   │   ├── usuario.go
+│   │   ├── publicacion.go
+│   │   ├── inventario.go
+│   │   ├── reputacion.go
+│   │   ├── logro.go
+│   │   ├── logro_usuario.go
+│   │   └── calificacion.go
+│   │
+│   ├── models/                  # structs compartidos (entidades)
+│   │   ├── acuerdo.go
+│   │   ├── acuerdo_item.go
+│   │   ├── usuarios.go
+│   │   ├── publicacion.go
+│   │   ├── inventario.go
+│   │   ├── reputacion.go
+│   │   ├── logro.go
+│   │   ├── logro_usuario.go
+│   │   └── calificacion.go
+│   │
+│   ├── middleware/
+│   │   ├── auth.go              # valida JWT, SoloAdmin (roles)
+│   │   └── cors.go
+│   │
+│   └── httpserver/
+│       └── httpserver.go        # wrapper de http.Server + graceful shutdown
+│
+├── postman/                     # colecciones de Postman por módulo
+├── Dockerfile
+├── docker-compose.yaml
+├── .env.example
+├── go.mod / go.sum
+└── README.md
+```
+
+---
+
+## Tests
+
+```bash
+# Correr todos los tests
+go test ./... -cover
+
+# Ver cobertura por módulo
+go test ./internal/service/modulo_pi/... -cover
+go test ./internal/service/modulo_rlc/... -cover
+go test ./internal/service/modulo_aiu/... -cover
+go test ./internal/storage/... -cover
+go test ./internal/handlers/... -cover
+```
+
+Cobertura actual:
+- `service/modulo_pi`: 95%+
+- `service/modulo_rlc`: 95%+
+- `service/modulo_aiu`: 50%+
+
+---
+
+## Roles y autenticación
+
+La API usa JWT con dos roles:
+
+- **persona / empresa:** puede crear y ver inventario, publicaciones, acuerdos y calificaciones
+- **admin:** acceso completo — además puede gestionar usuarios, logros, logros de usuario, y modificar reputaciones
+
+Para registrarse como admin:
+```json
+POST /api/v1/auth/register
+{
+    "email": "admin@test.com",
+    "password": "secreta123",
+    "tipo": "admin"
+}
+```
+
+Para usar rutas protegidas, incluye el token en el header:
+```
+Authorization: Bearer <token>
+```
+
+---
+
+## Documentos del proyecto
+
+Colecciones de Postman: `/postman/`
+
+Documentos adicionales (problema, entrevistas, diagrama ER, documento de cierre):
+https://uleam-my.sharepoint.com/:f:/g/personal/e1350140990_live_uleam_edu_ec/IgDPcqsDRv5gRJwr6v39Be3IAdZLn4wA85WITu23YC422JA?e=QhxhUm

@@ -4,13 +4,13 @@ import "proyecto-semestral/internal/models"
 
 func (a *AlmacenSQLite) ListarPublicacion() []models.Publicacion {
 	var items []models.Publicacion
-	a.db.Find(&items)
+	a.db.Preload("Inventario").Preload("Usuario").Find(&items)
 	return items
 }
 
 func (a *AlmacenSQLite) BuscarPublicacionPorID(id int) (models.Publicacion, bool) {
 	var item models.Publicacion
-	if err := a.db.First(&item, id).Error; err != nil {
+	if err := a.db.Preload("Inventario").Preload("Usuario").First(&item, id).Error; err != nil {
 		return models.Publicacion{}, false
 	}
 	return item, true
@@ -18,6 +18,8 @@ func (a *AlmacenSQLite) BuscarPublicacionPorID(id int) (models.Publicacion, bool
 
 func (a *AlmacenSQLite) CrearPublicacion(p models.Publicacion) models.Publicacion {
 	a.db.Create(&p)
+	// recarga con las relaciones después de crear
+	a.db.Preload("Inventario").Preload("Usuario").First(&p, p.ID)
 	return p
 }
 
@@ -28,6 +30,8 @@ func (a *AlmacenSQLite) ActualizarPublicacion(id int, datos models.Publicacion) 
 	}
 	datos.ID = id
 	a.db.Save(&datos)
+	// recarga con relaciones
+	a.db.Preload("Inventario").Preload("Usuario").First(&datos, id)
 	return datos, true
 }
 

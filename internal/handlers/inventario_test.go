@@ -51,7 +51,7 @@ func (f *usuarioFake) ListarUsuarios() []models.Usuario {
 }
 
 func (f *usuarioFake) BuscarUsuarioPorID(id int) (models.Usuario, bool) {
-	return models.Usuario{}, false
+	return models.Usuario{ID: id}, true
 }
 
 func (f *usuarioFake) ActualizarUsuario(id int, datos models.Usuario) (models.Usuario, bool) {

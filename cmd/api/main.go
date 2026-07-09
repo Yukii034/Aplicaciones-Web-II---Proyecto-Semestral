@@ -42,7 +42,7 @@ func run(cfg config.Config) error {
 	// 2. Capa de servicio.
 	authService := service.NuevoAuthService(recursos.Usuarios)
 	invService := pi.NewInventarioService(recursos.Almacen)
-	pubService := pi.NewPublicacionService(recursos.Almacen, recursos.Almacen)
+	pubService := pi.NewPublicacionService(recursos.Almacen, recursos.Almacen, recursos.Usuarios)
 	repService := rlc.NewReputacionService(recursos.Almacen)
 	luService := rlc.NewLogro_UsuarioService(recursos.Almacen)
 	lService := rlc.NewLogroService(recursos.Almacen)
@@ -85,12 +85,8 @@ func run(cfg config.Config) error {
 			r.Get("/inventario", servidor.ListarInventario)
 			r.Post("/inventario", servidor.CrearInventario)
 			r.Get("/inventario/{id}", servidor.ObtenerInventario)
-
-			r.Group(func(r chi.Router) {
-				r.Use(middleware.SoloAdmin) // acceso solo para admin, agg grupos a los que tengan que ver con sus entidades
-				r.Put("/inventario/{id}", servidor.ActualizarInventario)
-				r.Delete("/inventario/{id}", servidor.BorrarInventario)
-			})
+			r.Put("/inventario/{id}", servidor.ActualizarInventario)
+			r.Delete("/inventario/{id}", servidor.BorrarInventario)
 
 			r.Get("/publicaciones", servidor.ListarPublicacion)
 			r.Post("/publicaciones", servidor.CrearPublicacion)
@@ -103,25 +99,25 @@ func run(cfg config.Config) error {
 			r.Get("/reputaciones/{id}", servidor.ObtenerReputacion)
 
 			r.Group(func(r chi.Router) {
-				r.Use(middleware.SoloAdmin)
+				r.Use(middleware.SoloAdmin) // autenticacion de admin
 				r.Put("/reputaciones/{id}", servidor.ActualizarReputacion)
 				r.Delete("/reputaciones/{id}", servidor.BorrarReputacion)
 			})
 
 			r.Get("/logro_usuarios", servidor.ListarLogro_Usuario)
-			r.Post("/logro_usuarios", servidor.CrearLogro_Usuario)
 			r.Get("/logro_usuarios/{id}", servidor.ObtenerLogro_Usuario)
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.SoloAdmin)
+				r.Post("/logro_usuarios", servidor.CrearLogro_Usuario)
 				r.Put("/logro_usuarios/{id}", servidor.ActualizarLogro_Usuario)
 				r.Delete("/logro_usuarios/{id}", servidor.BorrarLogro_Usuario)
 			})
 
 			r.Get("/logros", servidor.ListarLogro)
-			r.Post("/logros", servidor.CrearLogro)
 			r.Get("/logros/{id}", servidor.ObtenerLogro)
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.SoloAdmin)
+				r.Post("/logros", servidor.CrearLogro)
 				r.Put("/logros/{id}", servidor.ActualizarLogro)
 				r.Delete("/logros/{id}", servidor.BorrarLogro)
 			})
@@ -132,11 +128,11 @@ func run(cfg config.Config) error {
 			r.Put("/calificaciones/{id}", servidor.ActualizarCalificacion)
 			r.Delete("/calificaciones/{id}", servidor.BorrarCalificacion)
 
-			r.Get("/usuarios", servidor.ListarUsuarios)
-			r.Post("/usuarios", servidor.CrearUsuario)
-			r.Get("/usuarios/{id}", servidor.ObtenerUsuario)
 			r.Group(func(r chi.Router) {
-				r.Use(middleware.SoloAdmin) // editar/borrar cuentas es tarea de admin
+				r.Use(middleware.SoloAdmin)
+				r.Get("/usuarios", servidor.ListarUsuarios)
+				r.Post("/usuarios", servidor.CrearUsuario)
+				r.Get("/usuarios/{id}", servidor.ObtenerUsuario)
 				r.Put("/usuarios/{id}", servidor.ActualizarUsuario)
 				r.Delete("/usuarios/{id}", servidor.EliminarUsuario)
 			})
@@ -145,19 +141,13 @@ func run(cfg config.Config) error {
 			r.Post("/acuerdos", servidor.CrearAcuerdo)
 			r.Get("/acuerdos/{id}", servidor.ObtenerAcuerdo)
 			r.Put("/acuerdos/{id}", servidor.ActualizarAcuerdo) // ofertante/solicitante avanzan el flujo del trato
-			r.Group(func(r chi.Router) {
-				r.Use(middleware.SoloAdmin) // borrado definitivo del registro
-				r.Delete("/acuerdos/{id}", servidor.EliminarAcuerdo)
-			})
+			r.Delete("/acuerdos/{id}", servidor.EliminarAcuerdo)
 
 			r.Get("/acuerdo_items", servidor.ListarAcuerdoItem)
 			r.Post("/acuerdo_items", servidor.CrearAcuerdoItem)
 			r.Get("/acuerdo_items/{id}", servidor.ObtenerAcuerdoItem)
 			r.Put("/acuerdo_items/{id}", servidor.ActualizarAcuerdoItem) // ajustar items mientras se negocia
-			r.Group(func(r chi.Router) {
-				r.Use(middleware.SoloAdmin)
-				r.Delete("/acuerdo_items/{id}", servidor.EliminarAcuerdoItem)
-			})
+			r.Delete("/acuerdo_items/{id}", servidor.EliminarAcuerdoItem)
 		})
 	})
 
