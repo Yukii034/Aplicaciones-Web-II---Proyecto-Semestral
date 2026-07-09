@@ -9,6 +9,7 @@ import (
 type CalificacionService struct {
 	repo    storage.CalificacionRepository
 	usuario storage.UserRepository
+	acuerdo storage.AcuerdoRepository
 }
 
 func NewCalificacionService(repo storage.CalificacionRepository) *CalificacionService {
@@ -30,6 +31,14 @@ func (s *CalificacionService) BuscarCalificacion(id int) (models.Calificacion, e
 func (s *CalificacionService) CrearCalificacion(c models.Calificacion) (models.Calificacion, error) {
 	if err := validarCalificacion(c); err != nil {
 		return models.Calificacion{}, err
+	}
+
+	if _, ok := s.usuario.BuscarUsuarioPorID(c.UsuarioID); !ok {
+		return models.Calificacion{}, se.ErrNoEncontrado
+	}
+
+	if _, ok := s.acuerdo.BuscarAcuerdoPorID(c.AcuerdoID); !ok {
+		return models.Calificacion{}, se.ErrNoEncontrado
 	}
 
 	return s.repo.CrearCalificacion(c), nil

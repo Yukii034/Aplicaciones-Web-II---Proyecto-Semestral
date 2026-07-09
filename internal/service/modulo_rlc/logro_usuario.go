@@ -7,8 +7,9 @@ import (
 )
 
 type Logro_UsuarioService struct {
-	repo  storage.Logro_UsuarioRepository
-	logro storage.LogroRepository
+	repo    storage.Logro_UsuarioRepository
+	logro   storage.LogroRepository
+	usuario storage.UserRepository
 }
 
 func NewLogro_UsuarioService(repo storage.Logro_UsuarioRepository) *Logro_UsuarioService {
@@ -30,6 +31,14 @@ func (s *Logro_UsuarioService) BuscarLogro_Usuario(id int) (models.Logro_Usuario
 func (s *Logro_UsuarioService) CrearLogro_Usuario(lu models.Logro_Usuario) (models.Logro_Usuario, error) {
 	if err := validarLogro_Usuario(lu); err != nil {
 		return models.Logro_Usuario{}, err
+	}
+
+	if _, ok := s.logro.BuscarLogroPorID(lu.LogroID); !ok {
+		return models.Logro_Usuario{}, se.ErrNoEncontrado
+	}
+
+	if _, ok := s.usuario.BuscarUsuarioPorID(lu.UsuarioID); !ok {
+		return models.Logro_Usuario{}, se.ErrNoEncontrado
 	}
 
 	return s.repo.CrearLogro_Usuario(lu), nil

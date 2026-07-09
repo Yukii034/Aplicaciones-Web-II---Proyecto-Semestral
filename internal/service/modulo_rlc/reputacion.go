@@ -32,6 +32,10 @@ func (s *ReputacionService) CrearReputacion(r models.Reputacion) (models.Reputac
 		return models.Reputacion{}, err
 	}
 
+	if _, ok := s.usuario.BuscarUsuarioPorID(r.UsuarioID); !ok {
+		return models.Reputacion{}, se.ErrNoEncontrado
+	}
+
 	return s.repo.CrearReputacion(r), nil
 }
 
