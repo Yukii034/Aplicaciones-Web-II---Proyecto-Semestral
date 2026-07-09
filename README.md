@@ -78,7 +78,7 @@ docker-compose down
 
 ---
 
-### Módulo de Publicaciones e Inventario — Pierina Peñaherrerea
+### Módulo de Publicaciones e Inventario — Pierina Peñaherrera
 
 #### Inventario
 
@@ -87,8 +87,8 @@ docker-compose down
 | GET | `/api/v1/inventario` | Listar todos los items | Bearer |
 | GET | `/api/v1/inventario/{id}` | Obtener item por ID | Bearer |
 | POST | `/api/v1/inventario` | Crear item en inventario | Bearer |
-| PUT | `/api/v1/inventario/{id}` | Actualizar item | Bearer + Admin |
-| DELETE | `/api/v1/inventario/{id}` | Borrar item | Bearer + Admin |
+| PUT | `/api/v1/inventario/{id}` | Actualizar item | Bearer |
+| DELETE | `/api/v1/inventario/{id}` | Borrar item | Bearer |
 
 Ejemplo de body para crear:
 ```json
@@ -123,44 +123,85 @@ Ejemplo de body para crear:
 }
 ```
 
-> **Nota:** Al crear una publicacion se valida que el `inventario_id` exista. Si no existe devuelve 404.
+> **Nota:** Al crear o actualizar una publicacion se valida que el `inventario_id` exista. Si no existe devuelve 404.
 
 ---
 
 ### Módulo de Reputación, Logros y Calificaciones — José Manuel Castillo
 
+#### Reputación
+
 | Método | Ruta | Descripción | Auth |
 |---|---|---|---|
 | GET | `/api/v1/reputaciones` | Listar reputaciones | Bearer |
-| POST | `/api/v1/reputaciones` | Crear reputacion | Bearer |
 | GET | `/api/v1/reputaciones/{id}` | Obtener por ID | Bearer |
-| PUT | `/api/v1/reputaciones/{id}` | Actualizar | Bearer |
-| DELETE | `/api/v1/reputaciones/{id}` | Borrar | Bearer |
+| POST | `/api/v1/reputaciones` | Crear reputacion | Bearer |
+| PUT | `/api/v1/reputaciones/{id}` | Actualizar | Bearer + Admin |
+| DELETE | `/api/v1/reputaciones/{id}` | Borrar | Bearer + Admin |
+
+#### Logros
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
 | GET | `/api/v1/logros` | Listar logros | Bearer |
-| POST | `/api/v1/logros` | Crear logro | Bearer |
 | GET | `/api/v1/logros/{id}` | Obtener por ID | Bearer |
-| PUT | `/api/v1/logros/{id}` | Actualizar | Bearer |
-| DELETE | `/api/v1/logros/{id}` | Borrar | Bearer |
+| POST | `/api/v1/logros` | Crear logro | Bearer + Admin |
+| PUT | `/api/v1/logros/{id}` | Actualizar | Bearer + Admin |
+| DELETE | `/api/v1/logros/{id}` | Borrar | Bearer + Admin |
+
+#### Logros de Usuario
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
 | GET | `/api/v1/logro_usuarios` | Listar logros de usuario | Bearer |
-| POST | `/api/v1/logro_usuarios` | Asignar logro a usuario | Bearer |
+| GET | `/api/v1/logro_usuarios/{id}` | Obtener por ID | Bearer |
+| POST | `/api/v1/logro_usuarios` | Asignar logro a usuario | Bearer + Admin |
+| PUT | `/api/v1/logro_usuarios/{id}` | Actualizar | Bearer + Admin |
+| DELETE | `/api/v1/logro_usuarios/{id}` | Borrar | Bearer + Admin |
+
+#### Calificaciones
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
 | GET | `/api/v1/calificaciones` | Listar calificaciones | Bearer |
+| GET | `/api/v1/calificaciones/{id}` | Obtener por ID | Bearer |
 | POST | `/api/v1/calificaciones` | Crear calificacion | Bearer |
+| PUT | `/api/v1/calificaciones/{id}` | Actualizar | Bearer |
+| DELETE | `/api/v1/calificaciones/{id}` | Borrar | Bearer |
 
 ---
 
 ### Módulo de Acuerdos y Transacciones — Néstor Gallegos
 
+#### Usuarios
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/api/v1/usuarios` | Listar usuarios | Bearer + Admin |
+| GET | `/api/v1/usuarios/{id}` | Obtener por ID | Bearer + Admin |
+| POST | `/api/v1/usuarios` | Crear usuario | Bearer + Admin |
+| PUT | `/api/v1/usuarios/{id}` | Actualizar | Bearer + Admin |
+| DELETE | `/api/v1/usuarios/{id}` | Borrar | Bearer + Admin |
+
+#### Acuerdos
+
 | Método | Ruta | Descripción | Auth |
 |---|---|---|---|
 | GET | `/api/v1/acuerdos` | Listar acuerdos | Bearer |
-| POST | `/api/v1/acuerdos` | Crear acuerdo | Bearer |
 | GET | `/api/v1/acuerdos/{id}` | Obtener por ID | Bearer |
-| PUT | `/api/v1/acuerdos/{id}` | Actualizar estado | Bearer |
+| POST | `/api/v1/acuerdos` | Crear acuerdo | Bearer |
+| PUT | `/api/v1/acuerdos/{id}` | Avanzar flujo del trato | Bearer |
 | DELETE | `/api/v1/acuerdos/{id}` | Borrar | Bearer |
+
+#### Acuerdo Items
+
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
 | GET | `/api/v1/acuerdo_items` | Listar items de acuerdo | Bearer |
+| GET | `/api/v1/acuerdo_items/{id}` | Obtener por ID | Bearer |
 | POST | `/api/v1/acuerdo_items` | Crear item de acuerdo | Bearer |
-| GET | `/api/v1/usuarios` | Listar usuarios | Bearer |
-| POST | `/api/v1/usuarios` | Crear usuario | Bearer |
+| PUT | `/api/v1/acuerdo_items/{id}` | Ajustar items mientras se negocia | Bearer |
+| DELETE | `/api/v1/acuerdo_items/{id}` | Borrar | Bearer |
 
 ---
 
@@ -255,7 +296,7 @@ Aplicaciones-Web-II---Proyecto-Semestral/
 │   └── httpserver/
 │       └── httpserver.go        # wrapper de http.Server + graceful shutdown
 │
-├── postman/                     # colecciones de Postman
+├── postman/                     # colecciones de Postman por módulo
 ├── Dockerfile
 ├── docker-compose.yaml
 ├── .env.example
@@ -273,6 +314,8 @@ go test ./... -cover
 
 # Ver cobertura por módulo
 go test ./internal/service/modulo_pi/... -cover
+go test ./internal/service/modulo_rlc/... -cover
+go test ./internal/service/modulo_aiu/... -cover
 go test ./internal/storage/... -cover
 go test ./internal/handlers/... -cover
 ```
@@ -288,8 +331,18 @@ Cobertura actual:
 
 La API usa JWT con dos roles:
 
-- **persona / empresa:** puede crear inventario y publicaciones, ver todo
-- **admin:** además puede actualizar y borrar inventario
+- **persona / empresa:** puede crear y ver inventario, publicaciones, acuerdos y calificaciones
+- **admin:** acceso completo — además puede gestionar usuarios, logros, logros de usuario, y modificar reputaciones
+
+Para registrarse como admin:
+```json
+POST /api/v1/auth/register
+{
+    "email": "admin@test.com",
+    "password": "secreta123",
+    "tipo": "admin"
+}
+```
 
 Para usar rutas protegidas, incluye el token en el header:
 ```
@@ -300,7 +353,7 @@ Authorization: Bearer <token>
 
 ## Documentos del proyecto
 
-Colección de Postman: `/postman/proyecto-semestral-coleccion.postman_collection.json`
+Colecciones de Postman: `/postman/`
 
 Documentos adicionales (problema, entrevistas, diagrama ER, documento de cierre):
 https://uleam-my.sharepoint.com/:f:/g/personal/e1350140990_live_uleam_edu_ec/IgDPcqsDRv5gRJwr6v39Be3IAdZLn4wA85WITu23YC422JA?e=QhxhUm
