@@ -46,6 +46,28 @@ func (m *reputacionRepoMock) BorrarReputacion(id int) bool {
 // red de seguridad
 var _ storage.ReputacionRepository = (*reputacionRepoMock)(nil)
 
+// usuario
+type usuarioRepoMockCall struct {
+	mock.Mock
+}
+
+func (m *usuarioRepoMockCall) BuscarUsuarioPorID(id int) (models.Usuario, bool) {
+	args := m.Called(id)
+	return args.Get(0).(models.Usuario), args.Bool(1)
+}
+
+func (m *usuarioRepoMockCall) ListarUsuarios() []models.Usuario { return nil }
+func (m *usuarioRepoMockCall) BuscarUsuarioPorEmail(e string) (models.Usuario, bool) {
+	return models.Usuario{}, false
+}
+func (m *usuarioRepoMockCall) CrearUsuario(u models.Usuario) models.Usuario { return models.Usuario{} }
+func (m *usuarioRepoMockCall) ActualizarUsuario(id int, d models.Usuario) (models.Usuario, bool) {
+	return models.Usuario{}, false
+}
+func (m *usuarioRepoMockCall) BorrarUsuario(id int) bool { return false }
+
+var _ storage.UserRepository = (*usuarioRepoMockCall)(nil)
+
 // --- Tests ---
 func TestReputacionService_Crear(t *testing.T) {
 	casos := []struct {
@@ -76,7 +98,14 @@ func TestReputacionService_Crear(t *testing.T) {
 				guardado.ID = 1
 				repo.On("CrearReputacion", c.entrada).Return(guardado)
 			}
-			svc := rlc.NewReputacionService(repo)
+			usuRepo := new(usuarioRepoMockCall)
+			if c.debePersistir {
+				guardado := c.entrada
+				guardado.ID = 1
+				repo.On("CrearPublicacion", c.entrada).Return(guardado)
+				usuRepo.On("BuscarUsuarioPorID", 1).Return(models.Usuario{ID: 1}, true)
+			}
+			svc := rlc.NewReputacionService(repo, usuRepo)
 
 			creado, err := svc.CrearReputacion(c.entrada)
 
@@ -95,7 +124,8 @@ func TestReputacionService_Crear(t *testing.T) {
 func TestReputacionService_Obtener_NoEncontrado(t *testing.T) {
 	repo := new(reputacionRepoMock)
 	repo.On("BuscarReputacionPorID", 999).Return(models.Reputacion{}, false)
-	svc := rlc.NewReputacionService(repo)
+	usrRepo := new(usuarioRepoMockCall)
+	svc := rlc.NewReputacionService(repo, usrRepo)
 
 	_, err := svc.BuscarReputacion(999)
 
@@ -106,7 +136,8 @@ func TestReputacionService_Obtener_NoEncontrado(t *testing.T) {
 func TestReputacionService_Borrar_NoEncontrado(t *testing.T) {
 	repo := new(reputacionRepoMock)
 	repo.On("BorrarReputacion", 999).Return(false)
-	svc := rlc.NewReputacionService(repo)
+	usrRepo := new(usuarioRepoMockCall)
+	svc := rlc.NewReputacionService(repo, usrRepo)
 
 	err := svc.BorrarReputacion(999)
 
@@ -116,8 +147,14 @@ func TestReputacionService_Borrar_NoEncontrado(t *testing.T) {
 
 func TestReputacionService_Actualizar_NoEncontrado(t *testing.T) {
 	repo := new(reputacionRepoMock)
-	repo.On("ActualizarReputacion", 999, models.Reputacion{PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5, UsuarioID: 1}).Return(models.Reputacion{}, false)
-	svc := rlc.NewReputacionService(repo)
+	usrRepo := new(usuarioRepoMockCall)
+
+	usrRepo.On("BuscarUsuarioPorID", 0).Return(models.Usuario{ID: 0}, true)
+
+	datos := models.Reputacion{PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5, UsuarioID: 1}
+	repo.On("ActualizarReputacion", 999, datos).Return(models.Reputacion{}, false)
+
+	svc := rlc.NewReputacionService(repo, usrRepo)
 
 	_, err := svc.ActualizarReputacion(999, models.Reputacion{PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5, UsuarioID: 1})
 
@@ -127,7 +164,8 @@ func TestReputacionService_Actualizar_NoEncontrado(t *testing.T) {
 
 func TestReputacionService_Actualizar_Puntos_TotalesVacio(t *testing.T) {
 	repo := new(reputacionRepoMock)
-	svc := rlc.NewReputacionService(repo)
+	usrRepo := new(usuarioRepoMockCall)
+	svc := rlc.NewReputacionService(repo, usrRepo)
 
 	_, err := svc.ActualizarReputacion(1, models.Reputacion{PuntosTotales: 0})
 
@@ -142,7 +180,8 @@ func TestReputacionService_Listar(t *testing.T) {
 		{ID: 2, PuntosTotales: 200, Nivel: 3, AcuerdosCompl: 7, CalificacionPromedio: 4.7},
 	}
 	repo.On("ListarReputacion").Return(esperado)
-	svc := rlc.NewReputacionService(repo)
+	usrRepo := new(usuarioRepoMockCall)
+	svc := rlc.NewReputacionService(repo, usrRepo)
 
 	lista := svc.ListarReputacion()
 
@@ -155,7 +194,8 @@ func TestReputacionService_Obtener_Exitoso(t *testing.T) {
 	repo := new(reputacionRepoMock)
 	esperado := models.Reputacion{ID: 1, PuntosTotales: 150, Nivel: 2, AcuerdosCompl: 4, CalificacionPromedio: 4.5}
 	repo.On("BuscarReputacionPorID", 1).Return(esperado, true)
-	svc := rlc.NewReputacionService(repo)
+	usrRepo := new(usuarioRepoMockCall)
+	svc := rlc.NewReputacionService(repo, usrRepo)
 
 	encontrado, err := svc.BuscarReputacion(1)
 
@@ -167,7 +207,8 @@ func TestReputacionService_Obtener_Exitoso(t *testing.T) {
 func TestReputacionService_Borrar_Exitoso(t *testing.T) {
 	repo := new(reputacionRepoMock)
 	repo.On("BorrarReputacion", 1).Return(true)
-	svc := rlc.NewReputacionService(repo)
+	usrRepo := new(usuarioRepoMockCall)
+	svc := rlc.NewReputacionService(repo, usrRepo)
 
 	err := svc.BorrarReputacion(1)
 

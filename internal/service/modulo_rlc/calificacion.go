@@ -12,8 +12,8 @@ type CalificacionService struct {
 	acuerdo storage.AcuerdoRepository
 }
 
-func NewCalificacionService(repo storage.CalificacionRepository) *CalificacionService {
-	return &CalificacionService{repo: repo}
+func NewCalificacionService(repo storage.CalificacionRepository, usuario storage.UserRepository, acuerdo storage.AcuerdoRepository) *CalificacionService {
+	return &CalificacionService{repo: repo, usuario: usuario, acuerdo: acuerdo}
 }
 
 func (s *CalificacionService) ListarCalificacion() []models.Calificacion {

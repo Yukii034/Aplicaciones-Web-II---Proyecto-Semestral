@@ -11,8 +11,8 @@ type ReputacionService struct {
 	usuario storage.UserRepository
 }
 
-func NewReputacionService(repo storage.ReputacionRepository) *ReputacionService {
-	return &ReputacionService{repo: repo}
+func NewReputacionService(repo storage.ReputacionRepository, usuario storage.UserRepository) *ReputacionService {
+	return &ReputacionService{repo: repo, usuario: usuario}
 }
 
 func (s *ReputacionService) ListarReputacion() []models.Reputacion {

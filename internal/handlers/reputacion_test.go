@@ -10,7 +10,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"proyecto-semestral/internal/handlers"
+	"proyecto-semestral/internal/middleware"
 	"proyecto-semestral/internal/models"
+	"proyecto-semestral/internal/service"
 	rlc "proyecto-semestral/internal/service/modulo_rlc"
 	"proyecto-semestral/internal/storage"
 )
@@ -68,31 +70,45 @@ func (f *ReputacionFake) BorrarReputacion(id int) bool {
 
 var _ storage.ReputacionRepository = (*ReputacionFake)(nil)
 
-func construirEntornoReputacion(t *testing.T) http.Handler {
+func construirEntornoReputacion(t *testing.T) (http.Handler, string) {
 	t.Helper()
 
 	repFake := nuevoReputacionFake()
-	repService := rlc.NewReputacionService(repFake)
+	usuFake := nuevoUsuarioFake() // viene de inventario_test.go
 
-	srv := handlers.NewServer(handlers.Deps{Reputacion: repService})
+	repService := rlc.NewReputacionService(repFake, usuFake)
+	authService := service.NuevoAuthService(usuFake)
+
+	srv := handlers.NewServer(handlers.Deps{
+		Reputacion: repService,
+		Auth:       authService,
+	})
 
 	r := chi.NewRouter()
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Get("/reputacion", srv.ListarReputacion)
-		r.Post("/reputacion", srv.CrearReputacion)
-		r.Get("/reputacion/{id}", srv.ObtenerReputacion)
-		r.Put("/reputacion/{id}", srv.ActualizarReputacion)
-		r.Delete("/reputacion/{id}", srv.BorrarReputacion)
+		r.Post("/auth/register", srv.Registrar)
+		r.Post("/auth/login", srv.Login)
+
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Auth(authService))
+			r.Get("/reputaciones", srv.ListarReputacion)
+			r.Post("/reputaciones", srv.CrearReputacion)
+			r.Get("/reputaciones/{id}", srv.ObtenerReputacion)
+			r.Put("/reputaciones/{id}", srv.ActualizarReputacion)
+			r.Delete("/reputaciones/{id}", srv.BorrarReputacion)
+		})
 	})
 
-	return r
+	token := registrarYObtenerToken(t, r)
+	return r, token
 }
 
 func TestCrearReputacion_Exitoso(t *testing.T) {
-	h := construirEntornoReputacion(t)
+	h, token := construirEntornoReputacion(t)
 	body := `{"puntos_totales":150,"nivel":2,"acuerdo_compl":5,"calificacion_pro":4.5,"usuario_id":1}`
 
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/reputacion", strings.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/reputaciones", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer "+token)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 
@@ -100,10 +116,11 @@ func TestCrearReputacion_Exitoso(t *testing.T) {
 }
 
 func TestCrearReputacion_UsuarioIDVacio(t *testing.T) {
-	h := construirEntornoReputacion(t)
+	h, token := construirEntornoReputacion(t)
 	body := `{"puntos_totales":150,"nivel":2,"acuerdo_compl":5,"calificacion_pro":4.5}`
 
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/reputacion", strings.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/reputaciones", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer "+token)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 
@@ -111,9 +128,10 @@ func TestCrearReputacion_UsuarioIDVacio(t *testing.T) {
 }
 
 func TestListarReputacion_Vacio(t *testing.T) {
-	h := construirEntornoReputacion(t)
+	h, token := construirEntornoReputacion(t)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/reputacion", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/reputaciones", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 
@@ -121,9 +139,10 @@ func TestListarReputacion_Vacio(t *testing.T) {
 }
 
 func TestObtenerReputacion_NoExiste(t *testing.T) {
-	h := construirEntornoReputacion(t)
+	h, token := construirEntornoReputacion(t)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/reputacion/999", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/reputaciones/999", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 
@@ -131,10 +150,11 @@ func TestObtenerReputacion_NoExiste(t *testing.T) {
 }
 
 func TestCrearReputacion_PuntosTotalesVacio(t *testing.T) {
-	h := construirEntornoReputacion(t)
+	h, token := construirEntornoReputacion(t)
 	body := `{"nivel":2,"acuerdo_compl":5,"calificacion_pro":4.5,"usuario_id":1}`
 
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/reputacion", strings.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/reputaciones", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer "+token)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 

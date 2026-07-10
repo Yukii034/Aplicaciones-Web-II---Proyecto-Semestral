@@ -12,8 +12,8 @@ type Logro_UsuarioService struct {
 	usuario storage.UserRepository
 }
 
-func NewLogro_UsuarioService(repo storage.Logro_UsuarioRepository) *Logro_UsuarioService {
-	return &Logro_UsuarioService{repo: repo}
+func NewLogro_UsuarioService(repo storage.Logro_UsuarioRepository, logro storage.LogroRepository, usuario storage.UserRepository) *Logro_UsuarioService {
+	return &Logro_UsuarioService{repo: repo, logro: logro, usuario: usuario}
 }
 
 func (s *Logro_UsuarioService) ListarLogro_Usuario() []models.Logro_Usuario {
