@@ -47,6 +47,50 @@ func (m *logro_usuarioRepoMock) BorrarLogro_Usuario(id int) bool {
 // red de seguridad
 var _ storage.Logro_UsuarioRepository = (*logro_usuarioRepoMock)(nil)
 
+// usuario
+type usuarioRepoMockCalll struct {
+	mock.Mock
+}
+
+func (m *usuarioRepoMockCalll) BuscarUsuarioPorID(id int) (models.Usuario, bool) {
+	args := m.Called(id)
+	return args.Get(0).(models.Usuario), args.Bool(1)
+}
+
+func (m *usuarioRepoMockCalll) ListarUsuarios() []models.Usuario { return nil }
+func (m *usuarioRepoMockCalll) BuscarUsuarioPorEmail(e string) (models.Usuario, bool) {
+	return models.Usuario{}, false
+}
+func (m *usuarioRepoMockCalll) CrearUsuario(u models.Usuario) models.Usuario { return models.Usuario{} }
+func (m *usuarioRepoMockCalll) ActualizarUsuario(id int, d models.Usuario) (models.Usuario, bool) {
+	return models.Usuario{}, false
+}
+func (m *usuarioRepoMockCalll) BorrarUsuario(id int) bool { return false }
+
+var _ storage.UserRepository = (*usuarioRepoMockCalll)(nil)
+
+// logro
+type LogroRepoMockCal struct {
+	mock.Mock
+}
+
+func (m *LogroRepoMockCal) BuscarLogroPorID(id int) (models.Logro, bool) {
+	args := m.Called(id)
+	return args.Get(0).(models.Logro), args.Bool(1)
+}
+
+func (m *LogroRepoMockCal) ListarLogro() []models.Logro { return nil }
+func (m *LogroRepoMockCal) BuscarLogroPorEmail(e string) (models.Logro, bool) {
+	return models.Logro{}, false
+}
+func (m *LogroRepoMockCal) CrearLogro(u models.Logro) models.Logro { return models.Logro{} }
+func (m *LogroRepoMockCal) ActualizarLogro(id int, d models.Logro) (models.Logro, bool) {
+	return models.Logro{}, false
+}
+func (m *LogroRepoMockCal) BorrarLogro(id int) bool { return false }
+
+var _ storage.LogroRepository = (*LogroRepoMockCal)(nil)
+
 // --- Tests ---
 func TestLogro_UsuarioService_Crear(t *testing.T) {
 	casos := []struct {
@@ -63,7 +107,7 @@ func TestLogro_UsuarioService_Crear(t *testing.T) {
 		},
 		{
 			nombre:        "logro usuario valido -> sin error y se persiste",
-			entrada:       models.Logro_Usuario{FechaDesbl: time.Now()},
+			entrada:       models.Logro_Usuario{FechaDesbl: time.Now(), UsuarioID: 1, LogroID: 1},
 			errEsperado:   nil,
 			debePersistir: true,
 		},
@@ -77,7 +121,16 @@ func TestLogro_UsuarioService_Crear(t *testing.T) {
 				guardado.ID = 1
 				repo.On("CrearLogro_Usuario", c.entrada).Return(guardado)
 			}
-			svc := rlc.NewLogro_UsuarioService(repo)
+			usrRepo := new(usuarioRepoMockCalll)
+			logRepo := new(LogroRepoMockCal)
+			if c.debePersistir {
+				guardado := c.entrada
+				guardado.ID = 1
+				repo.On("CrearLogro_Usuario", c.entrada).Return(guardado)
+				usrRepo.On("BuscarUsuarioPorID", 1).Return(models.Usuario{ID: 1}, true)
+				logRepo.On("BuscarLogroPorID", 1).Return(models.Logro{ID: 1}, true)
+			}
+			svc := rlc.NewLogro_UsuarioService(repo, logRepo, usrRepo)
 
 			creado, err := svc.CrearLogro_Usuario(c.entrada)
 
@@ -96,7 +149,8 @@ func TestLogro_UsuarioService_Crear(t *testing.T) {
 func TestLogro_Usuario_Obtener_NoEncontrado(t *testing.T) {
 	repo := new(logro_usuarioRepoMock)
 	repo.On("BuscarLogro_UsuarioPorID", 999).Return(models.Logro_Usuario{}, false)
-	svc := rlc.NewLogro_UsuarioService(repo)
+	logRepo := new(LogroRepoMockCal)
+	svc := rlc.NewLogro_UsuarioService(repo, logRepo, new(usuarioRepoMockCalll))
 
 	_, err := svc.BuscarLogro_Usuario(999)
 
@@ -107,7 +161,8 @@ func TestLogro_Usuario_Obtener_NoEncontrado(t *testing.T) {
 func TestLogro_UsuarioService_Borrar_NoEncontrado(t *testing.T) {
 	repo := new(logro_usuarioRepoMock)
 	repo.On("BorrarLogro_Usuario", 999).Return(false)
-	svc := rlc.NewLogro_UsuarioService(repo)
+	logRepo := new(LogroRepoMockCal)
+	svc := rlc.NewLogro_UsuarioService(repo, logRepo, new(usuarioRepoMockCalll))
 
 	err := svc.BorrarLogro_Usuario(999)
 
@@ -117,10 +172,13 @@ func TestLogro_UsuarioService_Borrar_NoEncontrado(t *testing.T) {
 
 func TestLogro_UsuarioService_Actualizar_NoEncontrado(t *testing.T) {
 	repo := new(logro_usuarioRepoMock)
+	logRepo := new(LogroRepoMockCal)
 	fecha := time.Now()
+	logRepo.On("BuscarLogroPorID")
 	datos := models.Logro_Usuario{FechaDesbl: fecha, UsuarioID: 1, LogroID: 1}
 	repo.On("ActualizarLogro_Usuario", 999, datos).Return(models.Logro_Usuario{}, false)
-	svc := rlc.NewLogro_UsuarioService(repo)
+	logRepo.On("BuscarLogroPorID", 0).Return(models.Logro{ID: 0}, true)
+	svc := rlc.NewLogro_UsuarioService(repo, logRepo, new(usuarioRepoMockCalll))
 
 	_, err := svc.ActualizarLogro_Usuario(999, datos)
 
@@ -130,7 +188,8 @@ func TestLogro_UsuarioService_Actualizar_NoEncontrado(t *testing.T) {
 
 func TestLogro_UsuarioService_Actualizar_FechaVacia(t *testing.T) {
 	repo := new(logro_usuarioRepoMock)
-	svc := rlc.NewLogro_UsuarioService(repo)
+	logRepo := new(LogroRepoMockCal)
+	svc := rlc.NewLogro_UsuarioService(repo, logRepo, new(usuarioRepoMockCalll))
 
 	_, err := svc.ActualizarLogro_Usuario(1, models.Logro_Usuario{})
 
@@ -146,7 +205,8 @@ func TestLogro_UsuarioService_Listar(t *testing.T) {
 		{ID: 2, FechaDesbl: fecha, UsuarioID: 2, LogroID: 2},
 	}
 	repo.On("ListarLogro_Usuario").Return(esperado)
-	svc := rlc.NewLogro_UsuarioService(repo)
+	logRepo := new(LogroRepoMockCal)
+	svc := rlc.NewLogro_UsuarioService(repo, logRepo, new(usuarioRepoMockCalll))
 
 	lista := svc.ListarLogro_Usuario()
 
@@ -160,7 +220,8 @@ func TestLogro_UsuarioService_Obtener_Exitoso(t *testing.T) {
 	fecha := time.Now()
 	esperado := models.Logro_Usuario{ID: 1, FechaDesbl: fecha, UsuarioID: 1, LogroID: 1}
 	repo.On("BuscarLogro_UsuarioPorID", 1).Return(esperado, true)
-	svc := rlc.NewLogro_UsuarioService(repo)
+	logRepo := new(LogroRepoMockCal)
+	svc := rlc.NewLogro_UsuarioService(repo, logRepo, new(usuarioRepoMockCalll))
 
 	encontrado, err := svc.BuscarLogro_Usuario(1)
 
@@ -172,7 +233,8 @@ func TestLogro_UsuarioService_Obtener_Exitoso(t *testing.T) {
 func TestLogro_UsuarioService_Borrar_Exitoso(t *testing.T) {
 	repo := new(logro_usuarioRepoMock)
 	repo.On("BorrarLogro_Usuario", 1).Return(true)
-	svc := rlc.NewLogro_UsuarioService(repo)
+	logRepo := new(LogroRepoMockCal)
+	svc := rlc.NewLogro_UsuarioService(repo, logRepo, new(usuarioRepoMockCalll))
 
 	err := svc.BorrarLogro_Usuario(1)
 

@@ -11,8 +11,8 @@ type ReputacionService struct {
 	usuario storage.UserRepository
 }
 
-func NewReputacionService(repo storage.ReputacionRepository) *ReputacionService {
-	return &ReputacionService{repo: repo}
+func NewReputacionService(repo storage.ReputacionRepository, usuario storage.UserRepository) *ReputacionService {
+	return &ReputacionService{repo: repo, usuario: usuario}
 }
 
 func (s *ReputacionService) ListarReputacion() []models.Reputacion {
@@ -30,6 +30,10 @@ func (s *ReputacionService) BuscarReputacion(id int) (models.Reputacion, error) 
 func (s *ReputacionService) CrearReputacion(r models.Reputacion) (models.Reputacion, error) {
 	if err := validarReputacion(r); err != nil {
 		return models.Reputacion{}, err
+	}
+
+	if _, ok := s.usuario.BuscarUsuarioPorID(r.UsuarioID); !ok {
+		return models.Reputacion{}, se.ErrNoEncontrado
 	}
 
 	return s.repo.CrearReputacion(r), nil
